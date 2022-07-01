@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\ValidEmail;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -20,5 +21,12 @@ class DatabaseSeeder extends Seeder
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         // ]);
+
+        $this->call([
+            ActiveSeeder::class,
+            RoleSeeder::class,
+            ValidEmailSeeder::class,
+            SubmissionStatusSeeder::class
+        ]);
     }
 }

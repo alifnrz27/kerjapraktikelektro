@@ -3,6 +3,7 @@
 namespace App\Actions\Fortify;
 
 use App\Models\User;
+use App\Models\ValidEmail;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
@@ -27,10 +28,22 @@ class CreateNewUser implements CreatesNewUsers
             'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature() ? ['accepted', 'required'] : '',
         ])->validate();
 
+        // cek email itera atau bukan
+        $checkEmail = explode("@", $input['email']);
+        $nameEmail = $checkEmail[1];
+        $validateEmail = ValidEmail::where('name', $nameEmail)->first();
+        if (!$validateEmail){
+            return abort(403);  
+        }
+        $username = $checkEmail[0];
+
         return User::create([
+            'role_id' => 3, // secara default 3 untuk mahasiswa
+            'username' => $username,
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => Hash::make($input['password']),
+            'active_id' => 1, // secara default 1 untuk anggota aktif
         ]);
     }
 }
