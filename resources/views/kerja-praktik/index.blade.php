@@ -98,7 +98,31 @@
         {{-- halaman jika di terima --}}
         @elseif($submissionStatus == 13)
         Pengajuan kamu diterima
-
+        Logbook
+        <form action="/input-logbook" method="POST">
+            @csrf
+            <input type="date" name="date">
+            <label for="">Deskripsi kegiatan</label>
+            <input type="text" name="description">
+            <button type="submit">Submit</button>
+        </form>
+        Daftar Logbook
+        <table>
+            @if($logbooks != Null)
+                <tr>
+                    <th>tanggal</th>
+                    <th>Deskripsi</th>
+                </tr>
+                @foreach($logbooks as $logbook)    
+                    <tr>
+                    <td>{{ $logbook->date }}</td>
+                    <td>{{ $logbook->description }}</td>
+                    </tr>
+                @endforeach
+            @else
+            Kau belum isi logbook pra   
+            @endif
+          </table>
         @endif
     @endif
     {{-- Akhir halaman mahasiswa --}}

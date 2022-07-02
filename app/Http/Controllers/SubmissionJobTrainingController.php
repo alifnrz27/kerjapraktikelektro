@@ -30,6 +30,24 @@ class SubmissionJobTrainingController extends Controller
 
         $validated = $request->validate($rules);
 
+        // cek apakah jumlah hari awal ke akhir minus apa tidak, kalau minus gagal daftar
+        $dateStart = strtotime($request->start);
+        $dateEnd = strtotime($request->end);
+        $now = strtotime('now +7 hours');
+        if(($dateEnd - $dateStart) <= 0){
+            return abort(403); // tanggal salah
+        }
+
+        // jika tanggal mulai ternyata sudah lewat
+        if(($dateStart - $now) <= 0){
+            return abort(403); // tanggal mulai sudah lewat
+        }
+
+        // jika input kurang dari 30 hari
+        if(($dateEnd - $dateStart) < (strtotime('now +30 days 7 hours') - $now)){
+            return abort(403); // minimal 30 hari
+        }
+
         //check team member
         if ($request->addTeam == 'on'){
             $submissionStatus = 2;
