@@ -16,8 +16,15 @@ return new class extends Migration
         Schema::create('submission_job_trainings', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id');
+            $table->foreignId('team_id')->nullable();
             $table->string('place');
-            $table->string('periode');
+            $table->string('start');
+            $table->String('end');
+            $table->string('description')->nullable();
+            $table->string('form')->nullable();
+            $table->string('transcript')->nullable();
+            $table->string('vaccine')->nullable();
+            $table->foreignId('academic_year_id');
             $table->foreignId('submission_status_id');
             $table->timestamps();
         });

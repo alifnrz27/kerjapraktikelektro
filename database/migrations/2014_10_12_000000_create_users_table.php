@@ -25,6 +25,7 @@ return new class extends Migration
             $table->foreignId('current_team_id')->nullable();
             $table->string('profile_photo_path', 2048)->nullable();
             $table->foreignId('active_id');
+            $table->boolean('inviteable')->default(1); //1 bisa, 0 tidak
             $table->timestamps();
         });
     }

@@ -22,34 +22,50 @@ class SubmissionStatusSeeder extends Seeder
             ],
             [
                 'id'    => 2,
-                'name' => 'Menuggu terima undangan',
+                'name' => 'Menuggu terima undangan anggota',
             ],
             [
                 'id'    => 3,
-                'name' => 'Menolak Undangan',
+                'name' => 'Mendapat undangan tim',
             ],
             [
                 'id'    => 4,
-                'name' => 'Mahasiswa membatalkan pengajuan',
+                'name' => 'Menerima undangan tim',
             ],
             [
                 'id'    => 5,
-                'name' => 'Ketua membatalkan pengajuan',
+                'name' => 'Menolak Undangan',
             ],
             [
                 'id'    => 6,
-                'name' => 'Tendik membatalkan pengajuan',
+                'name' => 'Menuggu tim upload berkas',
             ],
             [
                 'id'    => 7,
-                'name' => 'Berkas awal diterima',
+                'name' => 'Mahasiswa membatalkan pengajuan',
             ],
             [
                 'id'    => 8,
-                'name' => 'Pengajuan baru dari jurusan',
+                'name' => 'Ketua membatalkan pengajuan',
             ],
             [
                 'id'    => 9,
+                'name' => 'Tendik membatalkan pengajuan',
+            ],
+            [
+                'id'    => 10,
+                'name' => 'Berkas awal diterima',
+            ],
+            [
+                'id'    => 11,
+                'name' => 'Pengajuan baru dari jurusan',
+            ],
+            [
+                'id'    => 12,
+                'name' => 'Berkas jurusan di tolak',
+            ],
+            [
+                'id'    => 13,
                 'name' => 'KP diterima',
             ],
         ];

@@ -26,7 +26,9 @@ class DatabaseSeeder extends Seeder
             ActiveSeeder::class,
             RoleSeeder::class,
             ValidEmailSeeder::class,
-            SubmissionStatusSeeder::class
+            SubmissionStatusSeeder::class,
+            AcademicYearSeeder::class,
+            SemesterSeeder::class,
         ]);
     }
 }
