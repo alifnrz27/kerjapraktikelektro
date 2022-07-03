@@ -37,6 +37,10 @@ Route::middleware([
 
     Route::post('/upload-submission', [SubmissionJobTrainingController::class, 'uploadSubmission']);
     Route::post('/upload-member-submission', [SubmissionJobTrainingController::class, 'uploadMemberSubmission']);
+    Route::post('/accept-submission/{user}/{submission}', [SubmissionJobTrainingController::class, 'acceptSubmission']);
+    Route::post('/decline-submission/{user}/{submission}', [SubmissionJobTrainingController::class, 'declineSubmission']);
+    Route::post('/accept-letter/{user}/{team}', [SubmissionLetterController::class, 'acceptLetter']);
+    Route::post('/decline-letter/{user}/{team}', [SubmissionLetterController::class, 'declineLetter']);
     Route::post('/upload-letter', [SubmissionLetterController::class, 'upload']);
 
     Route::post('/input-logbook', [LogbookController::class, 'input']);

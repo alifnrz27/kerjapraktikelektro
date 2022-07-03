@@ -21,4 +21,9 @@ class SubmissionJobTraining extends Model
         'academic_year_id',
         'submission_status_id'
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

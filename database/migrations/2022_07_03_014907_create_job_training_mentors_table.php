@@ -13,14 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('reply_letters', function (Blueprint $table) {
+        Schema::create('job_training_mentors', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('team_id');
-            $table->foreignId('user_id');
+            $table->foreignId('student_id');
+            $table->foreignId('lecturer_id');
             $table->foreignId('academic_year_id');
-            $table->string('from_major');
-            $table->string('from_company');
-            $table->foreignId('reply_letter_status_id');
             $table->timestamps();
         });
     }
@@ -32,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('reply_letters');
+        Schema::dropIfExists('job_training_mentors');
     }
 };

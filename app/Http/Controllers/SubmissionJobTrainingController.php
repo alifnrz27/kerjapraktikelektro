@@ -52,6 +52,7 @@ class SubmissionJobTrainingController extends Controller
         if ($request->addTeam == 'on'){
             $submissionStatus = 2;
             $members = explode(' ', $request->teamMember);
+            $members = array_unique($members);
             foreach($members as $member){
                 $user = User::where([
                     'username' => $member,
@@ -164,6 +165,128 @@ class SubmissionJobTrainingController extends Controller
             $leaderSubmission = $leaderSubmission[$countSubmission-1];
             SubmissionJobTraining::where('team_id', $leaderSubmission->team_id)
         ->update(['submission_status_id' => 1]);
+        }
+    }
+
+    public function acceptSubmission(Request $request, User $user, SubmissionJobTraining $submission){
+        $currentSemester = AcademicYear::get();
+        $countSemester = count($currentSemester);
+        $currentSemester = $currentSemester[$countSemester-1];
+        // cek apakah ada submissionnya, takutnya malah diubah di inspect elemen
+        $checkSubmission = SubmissionJobTraining::where([
+            'id' => $submission->id,
+            'user_id' => $user->id,
+            'submission_status_id' => 1, //status sedang mengajukan
+            'academic_year_id' => $currentSemester->id
+        ])->first();
+
+        if(!$checkSubmission){
+            return abort(403); // submission tidak ditemukan
+        }
+
+
+        // jika dia tidak berkelompok ubah status menjadi diterima
+        if($submission->team_id == 0){
+            SubmissionJobTraining::where([
+                'id' => $submission->id
+            ])->update([
+                'submission_status_id' => 10
+            ]);
+        }
+
+        // jika berkelompok ubah status menjadi menunggu anggota lain di acc
+        else{
+            SubmissionJobTraining::where([
+                'id' => $submission->id
+            ])->update([
+                'submission_status_id' => 14
+            ]);
+
+            // cek jika seluruh anggota sudah di acc
+            $teamSubmissions = SubmissionJobTraining::where([
+                'team_id' => $submission->team_id
+            ])->get();
+            $waitingTeam = false;
+            foreach($teamSubmissions as $submission){
+                if($submission->submission_status_id == 1){
+                    $waitingTeam = true;
+                }
+            }
+            if($waitingTeam == false){
+                SubmissionJobTraining::where([
+                    'team_id' => $submission->team_id,
+                    'submission_status_id' => 14
+                ])->update([
+                    'submission_status_id' => 10
+                ]);
+            }
+        }
+    }
+
+    public function declineSubmission(Request $request, User $user, SubmissionJobTraining $submission){
+        $rules = [
+            'description' => 'required',
+        ];
+
+        $validated = $request->validate($rules);
+
+        $currentSemester = AcademicYear::get();
+        $countSemester = count($currentSemester);
+        $currentSemester = $currentSemester[$countSemester-1];
+        // cek apakah ada submissionnya, takutnya malah diubah di inspect elemen
+        $checkSubmission = SubmissionJobTraining::where([
+            'id' => $submission->id,
+            'user_id' => $user->id,
+            'submission_status_id' => 1, //status sedang mengajukan
+            'academic_year_id' => $currentSemester->id
+        ])->first();
+
+        if(!$checkSubmission){
+            return abort(403); // submission tidak ditemukan
+        }
+
+        // jika dia tidak berkelompok ubah status menjadi ditolak admin
+        if($submission->team_id == 0){
+            SubmissionJobTraining::where([
+                'id' => $submission->id
+                ])->update([
+                    'submission_status_id' => 9,
+                    'description' => $request->description,
+                ]);
+            User::where([
+                    'id' => $submission->user_id
+                    ])->update([
+                        'inviteable' => 1,
+                    ]);
+        }
+
+        // jika berkelompok ubah status menjadi ditolak beramai ramai
+        else{
+                // mendapatkan id masing masing anggota
+                $members = SubmissionJobTraining::select('user_id')
+                ->where([
+                    'team_id' => $submission->team_id,
+                    'submission_status_id' => 1,
+                ])->get();
+                $userID = [];
+                for($i = 0; $i < count($members); $i++){
+                    $userID[$i] = $members[$i]['user_id'];
+                }
+
+                User::whereIn('id', $userID)
+                ->update([
+                    'inviteable'=> 1
+                ]);
+
+            SubmissionJobTraining::where([
+                'team_id' => $submission->team_id,
+                'submission_status_id' => 1,
+            ])->update([
+                'submission_status_id' => 9,
+                'description' => $request->description,
+            ]);
+
+
         }
     }
 }

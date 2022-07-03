@@ -46,7 +46,7 @@ class SubmissionStatusSeeder extends Seeder
             ],
             [
                 'id'    => 8,
-                'name' => 'Ketua membatalkan pengajuan',
+                'name' => 'Anggota tim membatalkan pengajuan',
             ],
             [
                 'id'    => 9,
@@ -67,6 +67,10 @@ class SubmissionStatusSeeder extends Seeder
             [
                 'id'    => 13,
                 'name' => 'KP diterima',
+            ],
+            [
+                'id'    => 14,
+                'name' => 'Menunggu seluruh anggota tim diterima',
             ],
         ];
 

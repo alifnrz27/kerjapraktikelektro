@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
             SubmissionStatusSeeder::class,
             AcademicYearSeeder::class,
             SemesterSeeder::class,
+            ReplyLetterStatusSeeder::class
         ]);
     }
 }
