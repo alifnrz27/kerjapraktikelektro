@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\AcademicYear;
+use App\Models\JobTrainingMentor;
 use App\Models\Logbook;
 use App\Models\ReplyLetter;
 use App\Models\SubmissionJobTraining;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class JobTrainingController extends Controller
@@ -16,12 +18,18 @@ class JobTrainingController extends Controller
             'logbooks' => Null,
             'newSubmissions'=>Null,
             'newLetters' => Null,
+            'chooseMentor' => Null,
+            'academicYear' => Null,
+            'mentors' => Null,
+            'haveMentor'=>Null,
         ];
+
+        $academicYear = AcademicYear::get();
+        $countAcademicYear = count($academicYear);
+        $academicYear = $academicYear[$countAcademicYear-1];
+
         // jika user adalah admin
         if(auth()->user()->role_id == 1){
-            $academicYear = AcademicYear::get();
-            $countAcademicYear = count($academicYear);
-            $academicYear = $academicYear[$countAcademicYear-1];
             $newSubmissions = SubmissionJobTraining::where([
                 'submission_status_id' => 1,
                 'academic_year_id' => $academicYear->id,
@@ -38,6 +46,29 @@ class JobTrainingController extends Controller
 
             if(count($newLetters) > 0){
                 $data['newLetters'] = $newLetters;
+            }
+
+            $chooseMentor = SubmissionJobTraining::where([
+                'submission_status_id' => 13,
+                'academic_year_id' => $academicYear->id,
+            ])->get();
+            if(count($chooseMentor) > 0){
+                $data['chooseMentor'] = $chooseMentor;
+            }
+
+            $mentors = User::where([
+                'role_id' => 2,
+                'active_id' => 1,
+            ])->get();
+            if(count($mentors) > 0){
+                $data['mentors'] = $mentors;
+            }
+
+            $haveMentor = JobTrainingMentor::where([
+                'academic_year_id' => $academicYear->id,
+            ])->get();
+            if(count($haveMentor) > 0){
+                $data['haveMentor'] = $haveMentor;
             }
         }
 
@@ -72,6 +103,7 @@ class JobTrainingController extends Controller
             }
         }
 
+        $data['academicYear'] = $academicYear->id;
         return view('kerja-praktik.index', $data);
     }
 }

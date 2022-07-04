@@ -9,6 +9,10 @@ use Illuminate\Http\Request;
 class LogbookController extends Controller
 {
     public function input(Request $request){
+        // cek apakah yang akses adalah mahasiswa
+        if(auth()->user()->role_id != 3){
+            return abort(403);
+        }
         $rules = [
             'date' => 'required',
             'description' => 'required',

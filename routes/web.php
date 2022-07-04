@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CheckEmailController;
+use App\Http\Controllers\ChooseMentorController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\JobTrainingController;
 use App\Http\Controllers\LogbookController;
@@ -48,4 +49,8 @@ Route::middleware([
     Route::post('/accept-invitation', [InvitationController::class, 'acceptInvitation']);
     Route::post('/decline-invitation', [InvitationController::class, 'declineInvitation']);
     Route::post('/cancel-submission', [InvitationController::class, 'cancelSubmission']);
+
+    Route::put('/choose-mentor/{user}/{id}', [ChooseMentorController::class, 'update']);
+    Route::delete('/choose-mentor/{user}/{id}', [ChooseMentorController::class, 'destroy']);
+    Route::resource('/choose-mentor/{user}', ChooseMentorController::class)->except(['update', 'destroy', 'index', 'create', 'show', 'edit']);
 });

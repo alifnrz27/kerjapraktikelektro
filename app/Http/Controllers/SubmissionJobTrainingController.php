@@ -11,6 +11,10 @@ use Illuminate\Http\Request;
 class SubmissionJobTrainingController extends Controller
 {
     public function uploadSubmission(Request $request){
+        // cek apakah yang akses adalah mahasiswa
+        if(auth()->user()->role_id != 3){
+            return abort(403);
+        }
         $submissionStatus = 1;
         $teamID = 0;
         $academicYear = AcademicYear::get();
@@ -28,7 +32,7 @@ class SubmissionJobTrainingController extends Controller
             $rules['teamMember'] = 'required';
         }   
 
-        $validated = $request->validate($rules);
+        $request->validate($rules);
 
         // cek apakah jumlah hari awal ke akhir minus apa tidak, kalau minus gagal daftar
         $dateStart = strtotime($request->start);
@@ -123,6 +127,10 @@ class SubmissionJobTrainingController extends Controller
     }
 
     public function uploadMemberSubmission(Request $request){
+        // cek apakah yang akses adalah mahasiswa
+        if(auth()->user()->role_id != 3){
+            return abort(403);
+        }
         $academicYear = AcademicYear::get();
         $countAcademicYear = count($academicYear);
         $academicYear = $academicYear[$countAcademicYear-1];
@@ -169,6 +177,10 @@ class SubmissionJobTrainingController extends Controller
     }
 
     public function acceptSubmission(Request $request, User $user, SubmissionJobTraining $submission){
+        // cek apakah yang akses adalah admin
+        if(auth()->user()->role_id != 1){
+            return abort(403);
+        }
         $currentSemester = AcademicYear::get();
         $countSemester = count($currentSemester);
         $currentSemester = $currentSemester[$countSemester-1];
@@ -224,6 +236,10 @@ class SubmissionJobTrainingController extends Controller
     }
 
     public function declineSubmission(Request $request, User $user, SubmissionJobTraining $submission){
+        // cek apakah yang akses adalah admin
+        if(auth()->user()->role_id != 1){
+            return abort(403);
+        }
         $rules = [
             'description' => 'required',
         ];

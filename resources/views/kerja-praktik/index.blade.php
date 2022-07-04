@@ -58,10 +58,24 @@
             </tr>
 
             @foreach($newLetters as $letter)
-                <tr>
-                    <td>{{ $letter->user_id }}</td>
+            <tr>
+                {{-- jika berupa tim, tampilkan seluruh nama anggota --}}
+                    @if($letter->team_id != 0)
+                    <?php $members = App\Models\SubmissionJobTraining::where('team_id' , $letter->team_id)->get(); ?>
+                    <td>
+                    @foreach($members as $member)
+                    {{ $member->user->name }} ||
+                    @endforeach
+                    </td>
+                    <td>{{ $members[0]->place }}</td>
+                    <td>{{ $members[0]->start }} - {{ $members[0]->end }}</td>
+                    {{-- jika semdiri tampilkan namanya --}}
+                    @else
+                    <?php $member = App\Models\SubmissionJobTraining::where(['user_id' => $letter->user_id, 'submission_status_id'=>11, 'academic_year_id'=>$academicYear])->first(); ?>
+                    <td>{{ $member->user->name }}</td>
                     <td>tempat</td>
                     <td>tanggal</td>
+                    @endif
                     <td>
                         <form action="/accept-letter/{{ $letter->user->username }}/{{ $letter->team_id }}" method="POST">
                             @csrf
@@ -71,6 +85,77 @@
                             @csrf
                             <input type="text" name="description">
                             <button type="submit">Tolak</button>
+                        </form>
+                    </td>
+                </tr>
+            @endforeach
+            @endif
+        </table>
+
+        Pilih mentor untuk mahasiswa
+        <table>
+            @if($chooseMentor == Null)
+                Tidak ada mahasiswa
+            @else
+            <tr>
+                <td>Nama</td>
+                <td>Aksi</td>
+            </tr>
+            @foreach($chooseMentor as $student)
+                <tr>
+                    <td>{{ $student->user->name }}</td>
+                    <td>
+                        <form action="/choose-mentor/{{ $student->user->username }}" method="POST">
+                            @csrf
+                            <select name="mentor" id="mentor">
+                                @foreach($mentors as $mentor)
+                                    <option value="{{ $mentor->username }}">{{ $mentor->name }}</option>
+                                @endforeach
+                              </select>
+                              <button type="submit">Oke</button>
+                        </form>
+                    </td>
+                </tr>
+            @endforeach
+            @endif
+        </table>
+
+        Daftar yang udah punya pembimbing semester ini
+        <table>
+            @if($haveMentor == Null)
+                Belum ada mahasiswa yg punya mentor
+            @else
+            <tr>
+                <td>mahasiswa</td>
+                <td>dosen</td>
+                <td>aksi</td>
+            </tr>
+            @foreach ($haveMentor as $have)
+            <?php $student = App\Models\User::where(['id' => $have->student_id])->first();
+                $mentor = App\Models\User::where(['id' => $have->lecturer_id])->first();
+            ?>
+                <tr>
+                    <td>{{ $student->name }}</td>
+                    <td>{{ $mentor->name }}</td>
+                    <td>
+                        <form action="/choose-mentor/{{ $student->username }}/{{ $have->id }}" method="POST">
+                            @csrf
+                            @method('put')
+                            <select name="mentor" id="mentor">
+                                @foreach($mentors as $mentor)
+                                @if($have->lecturer_id == $mentor->id)
+                                <option value="{{ $mentor->username }}" selected>{{ $mentor->name }}</option>
+                                @else
+                                <option value="{{ $mentor->username }}">{{ $mentor->name }}</option>
+                                @endif
+                                @endforeach
+                              </select>
+                              <button type="submit">ganti</button>
+                        </form>
+                        <form action="/choose-mentor/{{ $student->username }}/{{ $have->id }}" method="POST">
+                            @csrf
+                            @method('delete')
+                            <button type="submit">hapus</button>
                         </form>
                     </td>
                 </tr>
@@ -171,6 +256,9 @@
             <button type="submit">batalkan pengajuan</button>
         </form>
 
+        {{-- halaman setelah upload berkas dari jurusan --}}
+        @elseif($submissionStatus == 11)
+        menunggu admin acc berkas jurusan
         {{-- halaman jika di terima --}}
         @elseif($submissionStatus == 13)
         Pengajuan kamu diterima
@@ -199,6 +287,8 @@
             Kau belum isi logbook pra   
             @endif
           </table>
+        @elseif($submissionStatus == 14)
+        mengunggu seluruh anggota tim di acc
         @endif
     @endif
     {{-- Akhir halaman mahasiswa --}}

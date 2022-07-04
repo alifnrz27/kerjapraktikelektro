@@ -10,6 +10,10 @@ use Illuminate\Http\Request;
 class InvitationController extends Controller
 {
     public function acceptInvitation(){
+        // cek apakah yang akses adalah mahasiswa
+        if(auth()->user()->role_id != 3){
+            return abort(403);
+        }
         $lastSubmission = SubmissionJobTraining::where('user_id', auth()->user()->id)->get();
         $countSubmission = count($lastSubmission);
         $lastSubmission = $lastSubmission[$countSubmission-1];
@@ -43,10 +47,14 @@ class InvitationController extends Controller
     }
 
     public function declineInvitation(){
-
+        // cek apakah yang akses adalah mahasiswa
+        if(auth()->user()->role_id != 3){
+            return abort(403);
+        }
         $lastSubmission = SubmissionJobTraining::where('user_id', auth()->user()->id)->get();
         $countSubmission = count($lastSubmission);
         $lastSubmission = $lastSubmission[$countSubmission-1];
+
 
         // ganti status jadi menolak undangan
         SubmissionJobTraining::where('id', $lastSubmission->id)
@@ -77,6 +85,10 @@ class InvitationController extends Controller
     }
 
     public function cancelSubmission(){
+        // cek apakah yang akses adalah mahasiswa
+        if(auth()->user()->role_id != 3){
+            return abort(403);
+        }
         $lastSubmission = SubmissionJobTraining::where('user_id', auth()->user()->id)->get();
         $countSubmission = count($lastSubmission);
         $lastSubmission = $lastSubmission[$countSubmission-1];

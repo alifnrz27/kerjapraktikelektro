@@ -12,6 +12,10 @@ use Illuminate\Http\Request;
 class SubmissionLetterController extends Controller
 {
     public function upload(Request $request){
+        // cek apakah yang akses adalah mahasiswa
+        if(auth()->user()->role_id != 3){
+            return abort(403);
+        }
         $submission = SubmissionJobTraining::where('user_id', auth()->user()->id)->get();
         $countSubmission = count($submission);
         $submission = $submission[$countSubmission-1];
@@ -60,6 +64,10 @@ class SubmissionLetterController extends Controller
     }
 
     public function acceptLetter(Request $request, User $user, $team_id){
+        // cek apakah yang akses adalah admin
+        if(auth()->user()->role_id != 1){
+            return abort(403);
+        }
         $academicYear = AcademicYear::get();
         $countAcademicYear = count($academicYear);
         $academicYear = $academicYear[$countAcademicYear-1];
@@ -103,6 +111,10 @@ class SubmissionLetterController extends Controller
     }
 
     public function declineLetter(Request $request, User $user, $team_id){
+        // cek apakah yang akses adalah admin
+        if(auth()->user()->role_id != 1){
+            return abort(403);
+        }
         $academicYear = AcademicYear::get();
         $countAcademicYear = count($academicYear);
         $academicYear = $academicYear[$countAcademicYear-1];
