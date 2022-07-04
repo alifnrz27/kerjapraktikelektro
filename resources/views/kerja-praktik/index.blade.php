@@ -167,6 +167,68 @@
 
     {{-- Halaman buat dosen --}}
     @elseif(auth()->user()->role_id == 2)
+    Daftar yang mengajukan mentoring
+    <table>
+        @if($addMentoring == Null)
+        Tidak ada yang mengajukan
+        @else
+        <tr>
+            <td>Nama</td>
+            <td>aksi</td>
+        </tr>
+        @foreach ($addMentoring as $mentoring)
+        <?php $student = App\Models\User::where(['id'=>$mentoring->student_id])->first(); ?>
+            <tr>
+                <td>{{ $student->name }}</td>
+                <td>
+                    <form action="/accept-mentoring/{{ $student->id }}" method="POST">
+                        @csrf
+                        <input type="datetime-local" name="time">
+                        <input type="text" name="description">
+                        <button type="submit">Terima</button>
+                    </form>
+                    <form action="/decline-mentoring/{{ $student->id }}" method="POST">
+                        @csrf
+                        <button type="submit">Tolak</button>
+                    </form>
+                </td>
+            </tr>
+        @endforeach
+            
+        @endif
+    </table>
+
+    Daftar antri mentoring
+    <table>
+        @if($mentoringQueue == Null)
+        Tidak ada antrian
+        @else
+        <tr>
+            <td>nama</td>
+            <td>jadwal</td>
+            <td>deskripsi</td>
+            <td>aksi</td>
+        </tr>
+        @foreach($mentoringQueue as $queue)
+        <?php $student = App\Models\User::where('id', $queue->student_id)->first() ?>
+            <tr>
+                <td>{{ $student->name }}</td>
+                <td>{{ $queue->time }}</td>
+                <td>{{ $queue->description }}</td>
+                <td>
+                    <form action="/finished-mentoring/{{ $queue->id }}" method="POST">
+                        @csrf
+                        <button type="submit">Selesai</button>
+                    </form>
+                    <form action="/cancel-mentoring/{{ $queue->id }}" method="POST">
+                        @csrf
+                        <button type="submit">Batal</button>
+                    </form>
+                </td>
+            </tr>
+        @endforeach
+        @endif
+    </table>
 
     {{-- akhir halaman dosen --}}
 
@@ -260,7 +322,7 @@
         @elseif($submissionStatus == 11)
         menunggu admin acc berkas jurusan
         {{-- halaman jika di terima --}}
-        @elseif($submissionStatus == 13)
+        @elseif($submissionStatus >= 13 && $submissionStatus != 14)
         Pengajuan kamu diterima
         Logbook
         <form action="/input-logbook" method="POST">
@@ -286,9 +348,51 @@
             @else
             Kau belum isi logbook pra   
             @endif
-          </table>
+        </table>
+        
+        @if($submissionStatus >= 15)
+            Riwayat Bimbingan
+            <table>
+                @if($studentMentoringHistory == Null)
+                    belum pernah mengajukan bimbingan
+                @else
+                <tr>
+                    <td>waktu</td>
+                    <td>keterangan</td>
+                    <td>status</td>
+                </tr>
+                    <?php $statusMentoring = App\Models\MentoringStatus::get(); 
+                        foreach($statusMentoring as $status){
+                            $allStatus[$status->id] = $status->name;
+                        }
+                    ?>
+
+                    @foreach ($studentMentoringHistory as $history)
+                        <tr>
+                            @if($history->time)
+                            <td>{{ $history->time }}</td>
+                            @else
+                            <td>-</td>
+                            @endif
+                            @if($history->time)
+                            <td>{{ $history->description }}</td>
+                            @else
+                            <td>-</td>
+                            @endif
+                            <td>{{ $allStatus[strval($history->mentoring_status_id)] }}</td>
+                        </tr>
+                    @endforeach
+                @endif
+            </table>
+            <form action="/add-mentoring-job-training" method="POST">
+                @csrf
+                <button type="submit">Ajukan bimbingan</button>
+            </form>
+        @endif
+        
         @elseif($submissionStatus == 14)
         mengunggu seluruh anggota tim di acc
+
         @endif
     @endif
     {{-- Akhir halaman mahasiswa --}}

@@ -29,7 +29,8 @@ class DatabaseSeeder extends Seeder
             SubmissionStatusSeeder::class,
             AcademicYearSeeder::class,
             SemesterSeeder::class,
-            ReplyLetterStatusSeeder::class
+            ReplyLetterStatusSeeder::class,
+            MentoringStatusSeeder::class,
         ]);
     }
 }

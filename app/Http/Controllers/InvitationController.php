@@ -25,25 +25,22 @@ class InvitationController extends Controller
         //mendapatkan user id ketua
         $leader = Team::where('id', $lastSubmission->team_id)->first();
         // mengambil data submission se tim yang belum acc undangan
-        $allTeamSubmission = SubmissionJobTraining::where(['team_id'=>$lastSubmission->team_id, 'submission_status_id' => 3])->get();
-        $teamSubmission = [];
-        if ($allTeamSubmission){
-            for ($i = 0; $i<count($allTeamSubmission); $i++){
-                if ($allTeamSubmission[$i]->user_id == $leader->user_id){
-                    continue;
-                }
-                $teamSubmission[$i] = $allTeamSubmission[$i];
+        $invitedSubmission = SubmissionJobTraining::where(['team_id'=>$lastSubmission->team_id, 'submission_status_id' => 3])->get();
+
+        // kalo udah gaada yg diundang lagi
+        if (count($invitedSubmission) == 0){
+            // ubah ketua jadi menunggu berkas seluruh anggota
+            SubmissionJobTraining::where(['team_id'=> $lastSubmission->team_id, 'submission_status_id'=> 2])
+                    ->update(['submission_status_id' => 6]);
+            // mengambil data anggota yang sudah acc tapi belum upload
+            $acceptedSubmission = SubmissionJobTraining::where(['team_id'=>$lastSubmission->team_id, 'submission_status_id' => 4])->get();
+
+            // kalo yg nerima undangan pada udah upload semua
+            if(count($acceptedSubmission) == 0){
+                SubmissionJobTraining::where(['team_id'=> $lastSubmission->team_id, 'submission_status_id'=> 6])
+                ->update(['submission_status_id' => 1]);
             }
-        }
-        // jika semua sudah menerima atau menolak undangan, maka ketua ganti status menjadi menunggu tim upload berkas
-        if (!$teamSubmission){
-            // ganti status ketua
-            $leaderSubmission = SubmissionJobTraining::where('user_id', $leader->user_id)->get();
-            $countSubmission = count($leaderSubmission);
-            $leaderSubmission = $leaderSubmission[$countSubmission-1];
-            SubmissionJobTraining::where('id', $leaderSubmission->id)
-        ->update(['submission_status_id' => 6]);
-        }
+        }   
     }
 
     public function declineInvitation(){

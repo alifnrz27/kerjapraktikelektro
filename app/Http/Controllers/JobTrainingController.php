@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AcademicYear;
 use App\Models\JobTrainingMentor;
 use App\Models\Logbook;
+use App\Models\MentoringJobTraining;
 use App\Models\ReplyLetter;
 use App\Models\SubmissionJobTraining;
 use App\Models\User;
@@ -22,6 +23,9 @@ class JobTrainingController extends Controller
             'academicYear' => Null,
             'mentors' => Null,
             'haveMentor'=>Null,
+            'addMentoring' => Null,
+            'mentoringQueue' => Null,
+            'studentMentoringHistory' =>Null,
         ];
 
         $academicYear = AcademicYear::get();
@@ -75,7 +79,22 @@ class JobTrainingController extends Controller
 
         // jika user adalah dosen 
         elseif(auth()->user()->role_id == 2){
+            // apakah ada mahasiswa yang mengajukan bimbingan
+            $addMentoring = MentoringJobTraining::where([
+                'lecturer_id' => auth()->user()->id,
+                'academic_year_id' =>$academicYear->id,
+                'mentoring_status_id' => 1,
+            ])->get();
 
+            if(count($addMentoring) > 0){
+                $data['addMentoring'] = $addMentoring;
+            }
+
+            // ambil data daftar antri bimbingan
+            $mentoringQueue = MentoringJobTraining::where(['lecturer_id' => auth()->user()->id, 'academic_year_id' => $academicYear->id, 'mentoring_status_id'=>3])->get();
+            if(count($mentoringQueue) > 0){
+                $data['mentoringQueue'] = $mentoringQueue;
+            }
         }
 
 
@@ -99,6 +118,12 @@ class JobTrainingController extends Controller
                 $logbooks = Logbook::where(['user_id' => auth()->user()->id, 'submission_job_training_id' => $lastSubmission->id])->get();
                 if(count($logbooks) > 0){
                     $data['logbooks'] = $logbooks;
+                }
+
+                // ambil data History bimbingan
+                $studentMentoringHistory = MentoringJobTraining::where(['student_id' => auth()->user()->id, 'academic_year_id' => $academicYear->id])->get();
+                if(count($studentMentoringHistory) > 0){
+                    $data['studentMentoringHistory'] = $studentMentoringHistory;
                 }
             }
         }

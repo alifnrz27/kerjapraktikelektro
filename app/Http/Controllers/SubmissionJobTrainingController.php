@@ -154,26 +154,25 @@ class SubmissionJobTrainingController extends Controller
                 'submission_status_id'=>6,
             ]);
 
-        $leader = Team::where('id', $lastSubmission->team_id)->first();
-        $allTeamSubmission = SubmissionJobTraining::where(['team_id'=>$lastSubmission->team_id])->get();
-        $teamSubmission = [];
-        if ($allTeamSubmission){
-            for ($i = 0; $i<count($allTeamSubmission); $i++){
-                if ($allTeamSubmission[$i]->submission_status_id == 6){
-                    continue;
+            //mendapatkan user id ketua
+            $leader = Team::where('id', $lastSubmission->team_id)->first();
+            // mengambil data submission se tim yang belum acc undangan
+            $invitedSubmission = SubmissionJobTraining::where(['team_id'=>$lastSubmission->team_id, 'submission_status_id' => 3])->get();
+
+            // kalo udah gaada yg diundang lagi
+            if (count($invitedSubmission) == 0){
+                // ubah ketua jadi menunggu berkas seluruh anggota
+                SubmissionJobTraining::where(['team_id'=> $lastSubmission->team_id, 'submission_status_id'=> 2])
+                        ->update(['submission_status_id' => 6]);
+                // mengambil data anggota yang sudah acc tapi belum upload
+                $acceptedSubmission = SubmissionJobTraining::where(['team_id'=>$lastSubmission->team_id, 'submission_status_id' => 4])->get();
+
+                // kalo yg nerima undangan pada udah upload semua
+                if(count($acceptedSubmission) == 0){
+                    SubmissionJobTraining::where(['team_id'=> $lastSubmission->team_id, 'submission_status_id'=> 6])
+                    ->update(['submission_status_id' => 1]);
                 }
-                $teamSubmission[$i] = $allTeamSubmission[$i];
-            }
-        }
-        // jika semua sudah upload berkas, maka seluruh tim ganti status jadi menunggu admin
-        if (count($teamSubmission) == 0){
-            // ganti status ketua
-            $leaderSubmission = SubmissionJobTraining::where('user_id', $leader->user_id)->get();
-            $countSubmission = count($leaderSubmission);
-            $leaderSubmission = $leaderSubmission[$countSubmission-1];
-            SubmissionJobTraining::where('team_id', $leaderSubmission->team_id)
-        ->update(['submission_status_id' => 1]);
-        }
+            }   
     }
 
     public function acceptSubmission(Request $request, User $user, SubmissionJobTraining $submission){

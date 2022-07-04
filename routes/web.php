@@ -5,8 +5,10 @@ use App\Http\Controllers\ChooseMentorController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\JobTrainingController;
 use App\Http\Controllers\LogbookController;
+use App\Http\Controllers\MentoringJobTrainingController;
 use App\Http\Controllers\SubmissionJobTrainingController;
 use App\Http\Controllers\SubmissionLetterController;
+use App\Models\MentoringJobTraining;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -53,4 +55,10 @@ Route::middleware([
     Route::put('/choose-mentor/{user}/{id}', [ChooseMentorController::class, 'update']);
     Route::delete('/choose-mentor/{user}/{id}', [ChooseMentorController::class, 'destroy']);
     Route::resource('/choose-mentor/{user}', ChooseMentorController::class)->except(['update', 'destroy', 'index', 'create', 'show', 'edit']);
+
+    Route::post('/add-mentoring-job-training', [MentoringJobTrainingController::class, 'add']);
+    Route::post('/decline-mentoring/{student}', [MentoringJobTrainingController::class, 'decline']);
+    Route::post('/accept-mentoring/{student}', [MentoringJobTrainingController::class, 'accept']);
+    Route::post('/cancel-mentoring/{id}', [MentoringJobTrainingController::class, 'cancel']);
+    Route::post('/finished-mentoring/{id}', [MentoringJobTrainingController::class, 'finished']);
 });
