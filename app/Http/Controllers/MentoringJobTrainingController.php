@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AcademicYear;
 use App\Models\JobTrainingMentor;
 use App\Models\MentoringJobTraining;
+use App\Models\SubmissionJobTraining;
 use Illuminate\Http\Request;
 
 class MentoringJobTrainingController extends Controller
@@ -156,6 +157,37 @@ class MentoringJobTrainingController extends Controller
             'mentoring_status_id' => 3,
         ])->update([
             'mentoring_status_id' => 4,
+        ]);
+    }
+
+    public function update(Request $request, $queueID){
+        $request->validate([
+            'time' => 'required',
+            'description' => 'required',
+        ]);
+        $academicYear = AcademicYear::get();
+        $countAcademicYear = count($academicYear);
+        $academicYear = $academicYear[$countAcademicYear-1];
+        // cek apakah ada yg mengajukan, takutnya diubah ubah datanya di inspect elemen
+        $check = MentoringJobTraining::where([
+            'id' => $queueID,
+            'lecturer_id' => auth()->user()->id,
+            'academic_year_id' =>$academicYear->id,
+            'mentoring_status_id' => 3,
+        ])->first();
+
+        if(!$check){
+            return "data gaada";
+        }
+
+        MentoringJobTraining::where([
+            'id' => $queueID,
+            'lecturer_id' => auth()->user()->id,
+            'academic_year_id' =>$academicYear->id,
+            'mentoring_status_id' => 3,
+        ])->update([
+            'time' => $request->time,
+            'description' => $request->description
         ]);
     }
 }

@@ -8,6 +8,7 @@ use App\Models\Logbook;
 use App\Models\MentoringJobTraining;
 use App\Models\ReplyLetter;
 use App\Models\SubmissionJobTraining;
+use App\Models\SubmissionReport;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -26,6 +27,8 @@ class JobTrainingController extends Controller
             'addMentoring' => Null,
             'mentoringQueue' => Null,
             'studentMentoringHistory' =>Null,
+            'reportHistory' => Null,
+            'reportQueue' => Null,
         ];
 
         $academicYear = AcademicYear::get();
@@ -95,6 +98,12 @@ class JobTrainingController extends Controller
             if(count($mentoringQueue) > 0){
                 $data['mentoringQueue'] = $mentoringQueue;
             }
+
+            // ambil data daftar antri revisi
+            $reportQueue = SubmissionReport::where(['lecturer_id' => auth()->user()->id, 'academic_year_id' => $academicYear->id, 'submission_report_status_id'=>1])->get();
+            if(count($reportQueue) > 0){
+                $data['reportQueue'] = $reportQueue;
+            }
         }
 
 
@@ -124,6 +133,15 @@ class JobTrainingController extends Controller
                 $studentMentoringHistory = MentoringJobTraining::where(['student_id' => auth()->user()->id, 'academic_year_id' => $academicYear->id])->get();
                 if(count($studentMentoringHistory) > 0){
                     $data['studentMentoringHistory'] = $studentMentoringHistory;
+                }
+
+                $reportHistory = SubmissionReport::where([
+                    'student_id' => auth()->user()->id,
+                    'academic_year_id' => $academicYear->id,
+                ])->get();
+
+                if(count($reportHistory) > 0){
+                    $data['reportHistory'] = $reportHistory;
                 }
             }
         }

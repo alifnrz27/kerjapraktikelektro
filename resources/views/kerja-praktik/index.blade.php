@@ -224,6 +224,43 @@
                         @csrf
                         <button type="submit">Batal</button>
                     </form>
+                    <form action="/update-mentoring/{{ $queue->id }}" method="POST">
+                        @csrf
+                        <input type="datetime-local" name="time" value="{{ $queue->time }}">
+                        <input type="text" name="description" value="{{ $queue->description }}">
+                        <button type="submit">Update</button>
+                    </form>
+                </td>
+            </tr>
+        @endforeach
+        @endif
+    </table>
+
+    Daftar antri Revisi Laporan
+    <table>
+        @if($reportQueue == Null)
+        Tidak ada antrian
+        @else
+        <tr>
+            <td>nama</td>
+            <td>link</td>
+            <td></td>
+        </tr>
+        @foreach($reportQueue as $queue)
+        <?php $student = App\Models\User::where('id', $queue->student_id)->first() ?>
+            <tr>
+                <td>{{ $student->name }}</td>
+                <td><a href="{{ $queue->report }}">Laporan</a></td>
+                <td>
+                    <form action="/accept-report/{{ $queue->id }}" method="POST">
+                        @csrf
+                        <button type="submit">Selesai</button>
+                    </form>
+                    <form action="/decline-report/{{ $queue->id }}" method="POST">
+                        @csrf
+                        <input type="text" name="description">
+                        <button type="submit">Revisi</button>
+                    </form>
                 </td>
             </tr>
         @endforeach
@@ -387,6 +424,37 @@
             <form action="/add-mentoring-job-training" method="POST">
                 @csrf
                 <button type="submit">Ajukan bimbingan</button>
+            </form>
+
+            Riwayat Perbaikan laporan
+            <table>
+                @if($reportHistory == Null)
+                belum pernah ngumpul laporan
+                @else
+                <tr>
+                    <td>status</td>
+                    <td>Keterangan</td>
+                </tr>
+                <?php 
+                    $statuses = App\Models\SubmissionReportStatus::get();
+                    $status = [];
+                    foreach($statuses as $i){
+                        $status[$i->id] = $i->name;
+                    }
+                ?>
+                @foreach($reportHistory as $history)
+                    <tr>
+                        <td>{{ $status[strval($history->submission_report_status_id)] }}</td>
+                        <td>{{ $history->description }}</td>
+                    </tr>
+                @endforeach
+                @endif
+            </table>
+            Ajukan laporan
+            <form action="/addReport" method="POST">
+                @csrf
+                <input type="text" name="report">
+                <button type="submit">Kirim</button>
             </form>
         @endif
         

@@ -8,7 +8,9 @@ use App\Http\Controllers\LogbookController;
 use App\Http\Controllers\MentoringJobTrainingController;
 use App\Http\Controllers\SubmissionJobTrainingController;
 use App\Http\Controllers\SubmissionLetterController;
+use App\Http\Controllers\SubmissionReportController;
 use App\Models\MentoringJobTraining;
+use App\Models\SubmissionReport;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -61,4 +63,9 @@ Route::middleware([
     Route::post('/accept-mentoring/{student}', [MentoringJobTrainingController::class, 'accept']);
     Route::post('/cancel-mentoring/{id}', [MentoringJobTrainingController::class, 'cancel']);
     Route::post('/finished-mentoring/{id}', [MentoringJobTrainingController::class, 'finished']);
+    Route::post('/update-mentoring/{id}', [MentoringJobTrainingController::class, 'update']);
+
+    Route::post('/addReport', [SubmissionReportController::class, 'add']);
+    Route::post('/decline-report/{id}', [SubmissionReportController::class, 'decline']);
+    Route::post('/accept-report/{id}', [SubmissionReportController::class, 'accept']);
 });

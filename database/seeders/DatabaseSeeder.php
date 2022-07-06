@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\SubmissionReportStatus;
 use App\Models\ValidEmail;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -31,6 +32,7 @@ class DatabaseSeeder extends Seeder
             SemesterSeeder::class,
             ReplyLetterStatusSeeder::class,
             MentoringStatusSeeder::class,
+            SubmissionReportStatusSeeder::class,
         ]);
     }
 }

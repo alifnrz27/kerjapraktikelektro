@@ -78,34 +78,30 @@ class SubmissionStatusSeeder extends Seeder
             ],
             [
                 'id'    => 16,
-                'name' => 'Selesai bimbingan',
+                'name' => 'Selesai bimbingan dan Tidak ada revisi laporan',
             ],
             [
                 'id'    => 17,
-                'name' => 'Tidak ada revisi laporan',
-            ],
-            [
-                'id'    => 18,
                 'name' => 'Berkas pra-presentasi diajukan, menunggu admin',
             ],
             [
-                'id'    => 19,
+                'id'    => 18,
                 'name' => 'Berkas pra-presentasi ditolak, ajukan ulang',
             ],
             [
-                'id'    => 20,
+                'id'    => 19,
                 'name' => 'Berkas pra-presentasi diterima',
             ],
             [
-                'id'    => 21,
+                'id'    => 20,
                 'name' => 'Mengajukan presentasi',
             ],
             [
-                'id'    => 22,
+                'id'    => 21,
                 'name' => 'Presentasi sudah dijadwalkan',
             ],
             [
-                'id'    => 23,
+                'id'    => 22,
                 'name' => 'Sudah presentasi',
             ],
         ];
