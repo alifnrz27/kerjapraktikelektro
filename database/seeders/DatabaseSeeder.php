@@ -35,6 +35,7 @@ class DatabaseSeeder extends Seeder
             MentoringStatusSeeder::class,
             JobTrainingTitleStatusSeeder::class,
             SubmissionReportStatusSeeder::class,
+            BeforePresentationStatusSeeder::class,
         ]);
     }
 }

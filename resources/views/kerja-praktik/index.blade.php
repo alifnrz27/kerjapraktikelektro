@@ -459,6 +459,130 @@
                 </div>
             </div>
         </section>
+
+        <section class="antialiased bg-gray-100 text-gray-600 h-screen px-4">
+            {{-- Daftar pilih dosen pembimbing untuk mahasiswa --}}
+            <div class="flex flex-col justify-center h-full">
+                <!-- Table -->
+                <div class="w-full max-w-2xl mx-auto bg-white shadow-lg rounded-sm border border-gray-200">
+                    <header class="px-5 py-4 border-b border-gray-100">
+                        <div class="font-semibold text-gray-800">Daftar pengumpulan berkas sebelum seminar</div>
+                    </header>
+                    @if($beforePresentationQueue == Null)
+                    tidak ada
+                    
+                    @else
+                    <div class="overflow-x-auto p-3">
+                        <table class="table-auto w-full">
+                            <thead class="text-xs font-semibold uppercase text-gray-400 bg-gray-50">
+                                <tr>
+                                    <th class="p-2">
+                                        <div class="font-semibold text-left">Nama</div>
+                                    </th>
+                                    <th class="p-2">
+                                        <div class="font-semibold text-left">Link</div>
+                                    </th>
+                                    <th class="p-2">
+                                        <div class="font-semibold text-center">Aksi</div>
+                                    </th>
+                                </tr>
+                            </thead>
+        
+                            <tbody class="text-sm divide-y divide-gray-100">
+                                @foreach($beforePresentationQueue as $queue)
+                                <?php $student = App\Models\User::where(['student_id' => $queue->student_id])->first() ?>
+                                <tr>
+                                    <td class="p-2">{{ $student->name }}</td>
+                                    <td class="p-2">
+                                    <a href="{{ $queue->form }}">Form</a>
+                                    <a href="{{ $queue->company }}">Nilai perusahaan</a>
+                                    <a href="{{ $queue->logbook }}">Logbook</a>
+                                    </td>
+                                    <td class="p-2">
+                                        <form action="/accept-before-presentation/{{ $student->id }}/{{ $queue->id }}" method="POST">
+                                            @csrf
+                                            <button type="submit">Oke</button>
+                                        </form>
+                                        <form action="/decline-before-presentation/{{ $student->id }}/{{ $queue->id }}" method="POST">
+                                            @csrf
+                                            <input type="text" name="description">
+                                            <button type="submit">tolak</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    @endif
+                </div>
+            </div>
+            {{-- Daftar pilih dosen pembimbing untuk mahasiswa --}}
+
+            <div class="flex flex-col justify-center h-full">
+                <!-- Table -->
+                <div class="w-full max-w-2xl mx-auto bg-white shadow-lg rounded-sm border border-gray-200">
+                    <header class="px-5 py-4 border-b border-gray-100">
+                        <div class="font-semibold text-gray-800">History Pilih Pembimbing</div>
+                    </header>
+                    @if($haveMentor == Null)
+                    tidak ada
+                    
+                    @else
+                    <div class="overflow-x-auto p-3">
+                        <table class="table-auto w-full">
+                            <thead class="text-xs font-semibold uppercase text-gray-400 bg-gray-50">
+                                <tr>
+                                    <th class="p-2">
+                                        <div class="font-semibold text-left">Nama</div>
+                                    </th>
+                                    <th class="p-2">
+                                        <div class="font-semibold text-left">Dosen</div>
+                                    </th>
+                                    <th class="p-2">
+                                        <div class="font-semibold text-center">Aksi</div>
+                                    </th>
+                                </tr>
+                            </thead>
+        
+                            <tbody class="text-sm divide-y divide-gray-100">
+                                @foreach ($haveMentor as $have)
+                                <?php $student = App\Models\User::where(['id' => $have->student_id])->first();
+                                    $mentor = App\Models\User::where(['id' => $have->lecturer_id])->first();
+                                ?>
+                                    <tr>
+                                        <td class="p-2">{{ $student->name }}</td>
+                                        <td class="p-2">{{ $mentor->name }}</td>
+                                        <td class="p-2">
+                                            <form action="/choose-mentor/{{ $student->username }}/{{ $have->id }}" method="POST">
+                                                @csrf
+                                                @method('put')
+                                                <select name="mentor" id="mentor">
+                                                    @foreach($mentors as $mentor)
+                                                    @if($have->lecturer_id == $mentor->id)
+                                                    <option value="{{ $mentor->username }}" selected>{{ $mentor->name }}</option>
+                                                    @else
+                                                    <option value="{{ $mentor->username }}">{{ $mentor->name }}</option>
+                                                    @endif
+                                                    @endforeach
+                                                </select>
+                                                <button type="submit">ganti</button>
+                                            </form>
+                                            <form action="/choose-mentor/{{ $student->username }}/{{ $have->id }}" method="POST">
+                                                @csrf
+                                                @method('delete')
+                                                <button type="submit">hapus</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    @endif
+                </div>
+            </div>
+        </section>
     </div>
 
     {{-- Akhir halaman Admin --}}
@@ -760,6 +884,7 @@
                     <td>
                         <form action="/accept-report/{{ $queue->id }}" method="POST">
                             @csrf
+                            <input type="text" name="description">
                             <button type="submit">Selesai</button>
                         </form>
                         <form action="/decline-report/{{ $queue->id }}" method="POST">
@@ -1091,39 +1216,68 @@
                         {{-- Akhir history pengajuan judul --}}
 
                         {{-- Awal laporan --}}
-                        <div>
-                            Riwayat Perbaikan laporan
-                            <table>
-                                @if($reportHistory == Null)
-                                belum pernah ngumpul laporan
-                                @else
-                                <tr>
-                                    <td>status</td>
-                                    <td>Keterangan</td>
-                                </tr>
-                                <?php 
-                                    $statuses = App\Models\SubmissionReportStatus::get();
-                                    $status = [];
-                                    foreach($statuses as $i){
-                                        $status[$i->id] = $i->name;
-                                    }
-                                ?>
-                                @foreach($reportHistory as $history)
-                                    <tr>
-                                        <td>{{ $status[strval($history->submission_report_status_id)] }}</td>
-                                        <td>{{ $history->description }}</td>
-                                    </tr>
-                                @endforeach
-                                @endif
-                            </table>
-                            Ajukan laporan
-                            <form action="/addReport" method="POST">
-                                @csrf
-                                <input type="text" name="report">
-                                <button type="submit">Kirim</button>
-                            </form>
-                        </div>
+                        <section class="antialiased bg-gray-100 text-gray-600 h-screen px-4">
+                            <div class="flex flex-col justify-center h-full">
+                                <!-- Table -->
+                                <div class="w-full max-w-2xl mx-auto bg-white shadow-lg rounded-sm border border-gray-200">
+                                    <header class="px-5 py-4 border-b border-gray-100">
+                                        <div class="font-semibold text-gray-800">Riwayat pengajuan revisi laporan</div>
+                                    </header>
+                                    @if($reportHistory == Null)
+                                    tidak ada
+                                    
+                                    @else
+                                    <div class="overflow-x-auto p-3">
+                                        <table class="table-auto w-full">
+                                            <thead class="text-xs font-semibold uppercase text-gray-400 bg-gray-50">
+                                                <tr>
+                                                    <th class="p-2">
+                                                        <div class="font-semibold text-left">Laporan</div>
+                                                    </th>
+                                                    <th class="p-2">
+                                                        <div class="font-semibold text-left">Deskripsi</div>
+                                                    </th>
+                                                    <th class="p-2">
+                                                        <div class="font-semibold text-left">Status</div>
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                        
+                                            <tbody class="text-sm divide-y divide-gray-100">
+                                                @foreach($reportHistory as $history)
+                                                    <tr>
+                                                        <td class="p">Revisi ke-{{ $loop->iteration }}</td>
+                                                        <td class="p-2">{{ $history->description }}</td>
+                                                        <td class="p-2">{{ $reportHistoryStatus[$history->submission_report_status_id - 1]->name }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    @endif
+                                </div>
+                            </div>
+                            <div>
+                                Ajukan laporan
+                                <form action="/addReport" method="POST">
+                                    @csrf
+                                    <input type="text" name="report">
+                                    <button type="submit">Kirim</button>
+                                </form>
+                            </div>
+                        </section>
                         {{-- Akhir laporan --}}
+
+                        {{-- Pengajuan Berkas Pra seminar --}}
+                        <form action="/add-before-presentation" method="POST">
+                            Pengajuan berkas sebelum seminar
+                            @csrf
+                            <input type="text" name="company">
+                            <input type="text" name="form">
+                            <input type="text" name="logbook">
+                            <button type="submit">Submit</button>
+                        </form>
+                        {{-- Akhir pengajuan berkas pra seminar --}}
                     @endif
 
                 @endif

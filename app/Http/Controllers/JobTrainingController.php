@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AcademicYear;
+use App\Models\beforePresentation;
 use App\Models\JobTrainingMentor;
 use App\Models\JobTrainingTitle;
 use App\Models\JobTrainingTitleStatus;
@@ -13,6 +14,7 @@ use App\Models\ReplyLetter;
 use App\Models\ReplyLetterStatus;
 use App\Models\SubmissionJobTraining;
 use App\Models\SubmissionReport;
+use App\Models\SubmissionReportStatus;
 use App\Models\SubmissionStatus;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -32,6 +34,7 @@ class JobTrainingController extends Controller
             'studentJobTrainingTitleHistoryStatus' => Null,
             'historyQueueSubmissions' => Null,
             'queueSubmissionStatus'=> Null,
+            'beforePresentationQueue' => Null,
             'newLetters' => Null,
             'historyLetters' => Null,
             'historyLettersStatus' => Null,
@@ -48,6 +51,7 @@ class JobTrainingController extends Controller
             'studentMentoringHistory' =>Null,
             'studentMentoringHistoryStatus' => Null,
             'reportHistory' => Null,
+            'reportHistoryStatus' => Null,
             'reportQueue' => Null,
         ];
 
@@ -118,6 +122,12 @@ class JobTrainingController extends Controller
             ])->get();
             if(count($haveMentor) > 0){
                 $data['haveMentor'] = $haveMentor;
+            }
+
+            // mengambil data mahasiswa yang mengumpulkan berkas sebelum presentasi
+            $beforePresentationQueue = beforePresentation::where(['academic_year_id' => $academicYear->id, 'before_presentation_status_id' => 1])->get();
+            if(count($beforePresentationQueue) > 0){
+                $data['beforePresentationQueue'] = $beforePresentationQueue;
             }
 
         }
@@ -208,6 +218,9 @@ class JobTrainingController extends Controller
                 if(count($reportHistory) > 0){
                     $data['reportHistory'] = $reportHistory;
                 }
+
+                $reportHistoryStatus = SubmissionReportStatus::get();
+                $data['reportHistoryStatus'] = $reportHistoryStatus;
 
                 // ambil data history pengajuan judul
                 $studentJobTrainingTitleHistory = JobTrainingTitle::where([

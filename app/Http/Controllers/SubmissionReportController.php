@@ -13,14 +13,12 @@ use Illuminate\Http\Request;
 class SubmissionReportController extends Controller
 {
     public function add(Request $request){
-        $academicYear = AcademicYear::get();
-        $countSemester = count($academicYear);
-        $academicYear = $academicYear[$countSemester-1];
+        $academicYear = AcademicYear::where(['is_active' => 1])->first();
 
         // cek apakah sebelumnya pernah mengajukan
         $check = SubmissionReport::where(['student_id' => auth()->user()->id, 'academic_year_id' => $academicYear->id, 'submission_report_status_id' => 1])->first();
         if($check) {
-            return "menunggu di acc dosen";
+            return back()->with('status', 'silahkan menunggu pengajuan sebelumnya');
         }
         $request->validate([
             'report' => 'required',
@@ -32,7 +30,7 @@ class SubmissionReportController extends Controller
         ])->first();
 
         if(!$mentorID){
-            return "gaada";
+            return back()->with('status', 'Dosen pembimbing tidak ditemukan');
         }
 
         SubmissionReport::create([
@@ -43,7 +41,7 @@ class SubmissionReportController extends Controller
             'submission_report_status_id' => 1,
             'description'=>'-',
         ]);
-
+        return back()->with('status', 'Berhasil mengajukan laporan');
 
     }
 
@@ -51,9 +49,7 @@ class SubmissionReportController extends Controller
         $request->validate([
             'description' => 'required',
         ]);
-        $academicYear = AcademicYear::get();
-        $countAcademicYear = count($academicYear);
-        $academicYear = $academicYear[$countAcademicYear-1];
+        $academicYear = AcademicYear::where(['is_active' => 1])->first();
         // cek apakah ada yg mengajukan, takutnya diubah ubah datanya di inspect elemen
         $check = SubmissionReport::where([
             'id' => $id,
@@ -63,7 +59,7 @@ class SubmissionReportController extends Controller
         ])->first();
 
         if(!$check){
-            return "data gaada";
+            return back()->with('status', 'Data tidak ditemukan');
         }
 
         SubmissionReport::where([
@@ -75,12 +71,15 @@ class SubmissionReportController extends Controller
             'submission_report_status_id' => 2,
             'description' =>$request->description,
         ]);
+
+        return back()->with('status', 'Laporan ditolak');
     }
 
     public function accept(Request $request, $id){
-        $academicYear = AcademicYear::get();
-        $countAcademicYear = count($academicYear);
-        $academicYear = $academicYear[$countAcademicYear-1];
+        $request->validate([
+            'description' => 'required',
+        ]);
+        $academicYear = AcademicYear::where(['is_active'=>1])->first();
         // cek apakah ada yg mengajukan, takutnya diubah ubah datanya di inspect elemen
         $check = SubmissionReport::where([
             'id' => $id,
@@ -90,39 +89,19 @@ class SubmissionReportController extends Controller
         ])->first();
 
         if(!$check){
-            return "data gaada";
-        }
-        
-        // cek apakah sudah 4 kali bimbingan
-        $student = User::where(['id'=> $check->student_id])->first();
-        $checkMentoring = MentoringJobTraining::where([
-            'student_id' => $student->id,
-            'academic_year_id' => $academicYear->id,
-            'mentoring_status_id' => 4
-        ])->get();
-
-        // kalo udah 4 kali atau lebih
-        if(count($checkMentoring) >= 4){
-            SubmissionJobTraining::where([
-                'user_id' => $check->student_id,
-                'academic_year_id' =>$academicYear->id,
-                'submission_status_id' => 15,
-            ])->update([
-                'submission_status_id' => 16,
-            ]);
-
-            SubmissionReport::where([
-                'id' => $id,
-                'lecturer_id' => auth()->user()->id,
-                'academic_year_id' =>$academicYear->id,
-                'submission_report_status_id' => 1,
-            ])->update([
-                'submission_report_status_id' => 3,
-            ]);
+            return back()->with('status', 'Data tidak');;
         }
 
-        else{
-            return "mahasiswa belum bimbingan minimal 4 kali";
-        }
+        SubmissionReport::where([
+            'id' => $id,
+            'lecturer_id' => auth()->user()->id,
+            'academic_year_id' =>$academicYear->id,
+            'submission_report_status_id' => 1,
+        ])->update([
+            'submission_report_status_id' => 3,
+            'description' =>$request->description,
+        ]);
+
+        return back()->with('status', 'Berhasil menerima laporan');
     }
 }

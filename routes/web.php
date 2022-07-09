@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BeforePresentationController;
 use App\Http\Controllers\CheckEmailController;
 use App\Http\Controllers\ChooseMentorController;
 use App\Http\Controllers\InvitationController;
@@ -74,4 +75,8 @@ Route::middleware([
     Route::post('/addReport', [SubmissionReportController::class, 'add']);
     Route::post('/decline-report/{id}', [SubmissionReportController::class, 'decline']);
     Route::post('/accept-report/{id}', [SubmissionReportController::class, 'accept']);
+
+    Route::post('/add-before-presentation', [BeforePresentationController::class, 'add']);
+    Route::post('/decline-before-presentation/{student}/{id}', [BeforePresentationController::class, 'decline']);
+    Route::post('/accept-before-presentation/{student}/{id}', [BeforePresentationController::class, 'accept']);
 });
