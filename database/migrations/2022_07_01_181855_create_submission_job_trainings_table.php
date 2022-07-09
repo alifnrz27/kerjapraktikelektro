@@ -18,6 +18,9 @@ return new class extends Migration
             $table->foreignId('user_id');
             $table->foreignId('team_id')->nullable();
             $table->string('place');
+            $table->string('name_leader');
+            $table->string('address');
+            $table->string('number');
             $table->string('start');
             $table->String('end');
             $table->string('description')->nullable();

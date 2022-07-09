@@ -4,11 +4,13 @@ use App\Http\Controllers\CheckEmailController;
 use App\Http\Controllers\ChooseMentorController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\JobTrainingController;
+use App\Http\Controllers\JobTrainingTitleController;
 use App\Http\Controllers\LogbookController;
 use App\Http\Controllers\MentoringJobTrainingController;
 use App\Http\Controllers\SubmissionJobTrainingController;
 use App\Http\Controllers\SubmissionLetterController;
 use App\Http\Controllers\SubmissionReportController;
+use App\Models\JobTrainingTitle;
 use App\Models\MentoringJobTraining;
 use App\Models\SubmissionReport;
 use Illuminate\Support\Facades\Route;
@@ -64,6 +66,10 @@ Route::middleware([
     Route::post('/cancel-mentoring/{id}', [MentoringJobTrainingController::class, 'cancel']);
     Route::post('/finished-mentoring/{id}', [MentoringJobTrainingController::class, 'finished']);
     Route::post('/update-mentoring/{id}', [MentoringJobTrainingController::class, 'update']);
+
+    Route::post('/add-job-training-title', [JobTrainingTitleController::class, 'add']);
+    Route::post('/accept-job-training-title/{student}/{id}', [JobTrainingTitleController::class, 'accept']);
+    Route::post('/decline-job-training-title/{student}/{id}', [JobTrainingTitleController::class, 'decline']);
 
     Route::post('/addReport', [SubmissionReportController::class, 'add']);
     Route::post('/decline-report/{id}', [SubmissionReportController::class, 'decline']);

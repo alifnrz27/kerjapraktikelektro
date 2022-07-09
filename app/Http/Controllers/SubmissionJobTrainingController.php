@@ -11,11 +11,7 @@ use Illuminate\Http\Request;
 class SubmissionJobTrainingController extends Controller
 {
     public function uploadSubmission(Request $request){
-        // cek apakah yang akses adalah mahasiswa
-        if(auth()->user()->role_id != 3){
-            return abort(403);
-        }
-        $submissionStatus = 1;
+        $submissionStatus = 9;
         $teamID = 0;
         $academicYear = AcademicYear::get();
         $countAcademicYear = count($academicYear);
@@ -23,6 +19,9 @@ class SubmissionJobTrainingController extends Controller
         $rules = [
             'form' => 'required',
             'vaccine' => 'required',
+            'name_leader' => 'required',
+            'address' => 'required',
+            'number' => 'required',
             'transcript' => 'required',
             'place' => 'required',
             'start' => 'required',
@@ -39,22 +38,22 @@ class SubmissionJobTrainingController extends Controller
         $dateEnd = strtotime($request->end);
         $now = strtotime('now +7 hours');
         if(($dateEnd - $dateStart) <= 0){
-            return abort(403); // tanggal salah
+            return back()->with('status', 'Tanggal yang dimasukkan salah');
         }
 
         // jika tanggal mulai ternyata sudah lewat
         if(($dateStart - $now) <= 0){
-            return abort(403); // tanggal mulai sudah lewat
+            return back()->with('status', 'Tanggal mulai sudah lewat');
         }
 
         // jika input kurang dari 30 hari
         if(($dateEnd - $dateStart) < (strtotime('now +30 days 7 hours') - $now)){
-            return abort(403); // minimal 30 hari
+            return back()->with('status', 'Minimal pengajuan 30 Hari!');
         }
 
         //check team member
         if ($request->addTeam == 'on'){
-            $submissionStatus = 2;
+            $submissionStatus = 1;
             $members = explode(' ', $request->teamMember);
             $members = array_unique($members);
             foreach($members as $member){
@@ -67,12 +66,12 @@ class SubmissionJobTrainingController extends Controller
 
                 // ketika tidak ada usernya
                 if(!$user){
-                    return abort(404);  
+                    return back()->with('status', 'Anggota tim tidak ditemukan!'); 
                 }
 
                 // jika user menginvite diri sendiri
                 if($user->username == auth()->user()->username){
-                    return abort (403);
+                    return back()->with('status', 'Tidak bisa invite diri sendiri!');
                 }
             }
 
@@ -80,11 +79,10 @@ class SubmissionJobTrainingController extends Controller
             Team::create([
                 'user_id'=>auth()->user()->id,
             ]);
-            $team = Team::where('user_id', auth()->user()->id)->get();
-            $countTeam = count($team);
-            $team = $team[$countTeam-1];
+            $team = Team::where('user_id', auth()->user()->id)->latest()->first();
             $teamID = $team->id;
 
+            // tambahkan data anggota
             foreach($members as $member){
                 $user = User::where([
                     'username' => $member,
@@ -94,22 +92,29 @@ class SubmissionJobTrainingController extends Controller
                 ])->first();
                 SubmissionJobTraining::create([
                     'user_id'=>$user->id,
-                    'team_id'=>$teamID,
+                    'team_id'=>$team->id,
+                    'name_leader' => $request->name_leader,
+                    'address' => $request->address,
+                    'number' => $request->number,
                     'place'=>$request->place,
                     'start'=>$request->start,
                     'end'=>$request->end,
                     'academic_year_id'=>$academicYear->id,
-                    'submission_status_id'=>3,
+                    'submission_status_id'=>2,
                 ]);
                 User::where('username', $member)
                         ->update(['inviteable' => 0]);
             }
         }
 
+        // isi data untuk ketua
         $validatedData = [
             'user_id'=>auth()->user()->id,
             'team_id'=>$teamID,
             'place'=>$request->place,
+            'name_leader' => $request->name_leader,
+            'address' => $request->address,
+            'number' => $request->number,
             'start'=>$request->start,
             'end'=>$request->end,
             'form'=>$request->form,
@@ -118,22 +123,15 @@ class SubmissionJobTrainingController extends Controller
             'academic_year_id'=>$academicYear->id,
             'submission_status_id'=>$submissionStatus,
         ];
-
         SubmissionJobTraining::create($validatedData);
-
         User::where('id', auth()->user()->id)
               ->update(['inviteable' => 0]);
-        return 'awkaii';
+
+        return back()->with('status', 'Sukses menambahkan');
     }
 
     public function uploadMemberSubmission(Request $request){
-        // cek apakah yang akses adalah mahasiswa
-        if(auth()->user()->role_id != 3){
-            return abort(403);
-        }
-        $academicYear = AcademicYear::get();
-        $countAcademicYear = count($academicYear);
-        $academicYear = $academicYear[$countAcademicYear-1];
+        $academicYear = AcademicYear::where(['is_active' => 1])->first();
         $rules = [
             'form' => 'required',
             'vaccine' => 'required',
@@ -142,59 +140,50 @@ class SubmissionJobTrainingController extends Controller
 
         $validated = $request->validate($rules);
 
-        $lastSubmission = SubmissionJobTraining::where('user_id', auth()->user()->id)->get();
-        $countSubmission = count($lastSubmission);
-        $lastSubmission = $lastSubmission[$countSubmission-1];
+        $lastSubmission = SubmissionJobTraining::where('user_id', auth()->user()->id)->latest()->first();
 
-        SubmissionJobTraining::where('user_id', auth()->user()->id)
+        SubmissionJobTraining::where('id' , $lastSubmission->id)
               ->update([
                 'form'=>$request->form,
                 'vaccine'=>$request->vaccine,
                 'transcript'=>$request->transcript,
-                'submission_status_id'=>6,
+                'submission_status_id'=>5,
             ]);
 
-            //mendapatkan user id ketua
-            $leader = Team::where('id', $lastSubmission->team_id)->first();
             // mengambil data submission se tim yang belum acc undangan
-            $invitedSubmission = SubmissionJobTraining::where(['team_id'=>$lastSubmission->team_id, 'submission_status_id' => 3])->get();
+            $invitedSubmission = SubmissionJobTraining::where(['team_id'=>$lastSubmission->team_id, 'submission_status_id' => 2])->get();
 
             // kalo udah gaada yg diundang lagi
             if (count($invitedSubmission) == 0){
                 // ubah ketua jadi menunggu berkas seluruh anggota
-                SubmissionJobTraining::where(['team_id'=> $lastSubmission->team_id, 'submission_status_id'=> 2])
-                        ->update(['submission_status_id' => 6]);
+                SubmissionJobTraining::where(['team_id'=> $lastSubmission->team_id, 'submission_status_id'=> 1])
+                        ->update(['submission_status_id' => 5]);
                 // mengambil data anggota yang sudah acc tapi belum upload
                 $acceptedSubmission = SubmissionJobTraining::where(['team_id'=>$lastSubmission->team_id, 'submission_status_id' => 4])->get();
 
                 // kalo yg nerima undangan pada udah upload semua
                 if(count($acceptedSubmission) == 0){
-                    SubmissionJobTraining::where(['team_id'=> $lastSubmission->team_id, 'submission_status_id'=> 6])
-                    ->update(['submission_status_id' => 1]);
+                    SubmissionJobTraining::where(['team_id'=> $lastSubmission->team_id, 'submission_status_id'=> 5])
+                    ->update(['submission_status_id' => 9]);
                 }
             }   
+            return back()->with('status', 'Sukses menambahkan data');
     }
 
     public function acceptSubmission(Request $request, User $user, SubmissionJobTraining $submission){
-        // cek apakah yang akses adalah admin
-        if(auth()->user()->role_id != 1){
-            return abort(403);
-        }
-        $currentSemester = AcademicYear::get();
-        $countSemester = count($currentSemester);
-        $currentSemester = $currentSemester[$countSemester-1];
+
+        $academicYear = AcademicYear::where(['is_active' => 1])->first();
         // cek apakah ada submissionnya, takutnya malah diubah di inspect elemen
         $checkSubmission = SubmissionJobTraining::where([
-            'id' => $submission->id,
             'user_id' => $user->id,
-            'submission_status_id' => 1, //status sedang mengajukan
-            'academic_year_id' => $currentSemester->id
+            'id' => $submission->id,
+            'submission_status_id' => 9, //status sedang mengajukan
+            'academic_year_id' => $academicYear->id
         ])->first();
 
         if(!$checkSubmission){
-            return abort(403); // submission tidak ditemukan
+            return back()->with('status', 'mahasiswa tidak ditemukan');
         }
-
 
         // jika dia tidak berkelompok ubah status menjadi diterima
         if($submission->team_id == 0){
@@ -204,13 +193,13 @@ class SubmissionJobTrainingController extends Controller
                 'submission_status_id' => 10
             ]);
         }
-
+        
         // jika berkelompok ubah status menjadi menunggu anggota lain di acc
         else{
             SubmissionJobTraining::where([
                 'id' => $submission->id
             ])->update([
-                'submission_status_id' => 14
+                'submission_status_id' => 11
             ]);
 
             // cek jika seluruh anggota sudah di acc
@@ -219,45 +208,41 @@ class SubmissionJobTrainingController extends Controller
             ])->get();
             $waitingTeam = false;
             foreach($teamSubmissions as $submission){
-                if($submission->submission_status_id == 1){
+                if($submission->submission_status_id == 9){
                     $waitingTeam = true;
                 }
             }
             if($waitingTeam == false){
                 SubmissionJobTraining::where([
                     'team_id' => $submission->team_id,
-                    'submission_status_id' => 14
+                    'submission_status_id' => 11
                 ])->update([
                     'submission_status_id' => 10
                 ]);
             }
         }
+        return back()->with('status', 'sukses merubah data');
     }
 
     public function declineSubmission(Request $request, User $user, SubmissionJobTraining $submission){
-        // cek apakah yang akses adalah admin
-        if(auth()->user()->role_id != 1){
-            return abort(403);
-        }
+
         $rules = [
             'description' => 'required',
         ];
 
         $validated = $request->validate($rules);
 
-        $currentSemester = AcademicYear::get();
-        $countSemester = count($currentSemester);
-        $currentSemester = $currentSemester[$countSemester-1];
+        $academicYear = AcademicYear::where(['is_active' => 1])->first();
         // cek apakah ada submissionnya, takutnya malah diubah di inspect elemen
         $checkSubmission = SubmissionJobTraining::where([
             'id' => $submission->id,
             'user_id' => $user->id,
-            'submission_status_id' => 1, //status sedang mengajukan
-            'academic_year_id' => $currentSemester->id
+            'submission_status_id' => 9, //status sedang mengajukan
+            'academic_year_id' => $academicYear->id
         ])->first();
 
         if(!$checkSubmission){
-            return abort(403); // submission tidak ditemukan
+            return back()->with('status', 'Data tidak ditemukan');
         }
 
         // jika dia tidak berkelompok ubah status menjadi ditolak admin
@@ -265,7 +250,7 @@ class SubmissionJobTrainingController extends Controller
             SubmissionJobTraining::where([
                 'id' => $submission->id
                 ])->update([
-                    'submission_status_id' => 9,
+                    'submission_status_id' => 8,
                     'description' => $request->description,
                 ]);
             User::where([
@@ -281,7 +266,7 @@ class SubmissionJobTrainingController extends Controller
                 $members = SubmissionJobTraining::select('user_id')
                 ->where([
                     'team_id' => $submission->team_id,
-                    'submission_status_id' => 1,
+                    'submission_status_id' => 9,
                 ])->get();
                 $userID = [];
                 for($i = 0; $i < count($members); $i++){
@@ -295,13 +280,14 @@ class SubmissionJobTrainingController extends Controller
 
             SubmissionJobTraining::where([
                 'team_id' => $submission->team_id,
-                'submission_status_id' => 1,
-            ])->update([
                 'submission_status_id' => 9,
+            ])->update([
+                'submission_status_id' => 8,
                 'description' => $request->description,
             ]);
 
 
         }
+        return back()->with('status', 'Data ditolak');
     }
 }

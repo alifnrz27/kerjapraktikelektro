@@ -10,25 +10,6 @@ use Illuminate\Http\Request;
 
 class ChooseMentorController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -38,6 +19,7 @@ class ChooseMentorController extends Controller
      */
     public function store(Request $request, $student)
     {
+        $academicYear = AcademicYear::where(['is_active'=>1])->first();
         $request->validate(['mentor' => 'required']);
 
         // cek apakah dosen ada, takutnya diubah di inspect elemen
@@ -45,22 +27,18 @@ class ChooseMentorController extends Controller
         // cek apakah dosen ada, takutnya diubah di inspect elemen
         $student = User::where(['username' => $student, 'role_id' => 3, 'active_id' => 1])->first();
         if(!$mentor || $student->role_id != 3 || $student->active_id != 1){
-            return 'wkwk';// salah user
+            return back()->with('status', 'Tidak ada user');// salah user
         }
-
-        $academicYear = AcademicYear::get();
-        $countAcademicYear = count($academicYear);
-        $academicYear = $academicYear[$countAcademicYear-1];
 
         // cek apakah benar student belum mendapatkan mentor
         $submission = SubmissionJobTraining::where([
             'user_id' => $student->id,
             'academic_year_id' => $academicYear->id,
-            'submission_status_id' => 13,
+            'submission_status_id' => 14,
         ])->first();
 
         if(!$submission){
-            return abort(403);// ga ditemukan submissionnnya
+            return back()->with('status', 'Tidak ada data');// ga ditemukan submissionnnya
         }
 
         JobTrainingMentor::create([
@@ -71,30 +49,10 @@ class ChooseMentorController extends Controller
         SubmissionJobTraining::where([
             'user_id' => $student->id,
             'academic_year_id' => $academicYear->id,
-            'submission_status_id' => 13,
+            'submission_status_id' => 14,
         ])->update(['submission_status_id'=>15]);
-    }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
+        return back()->with('status', 'Berhasil menambahkan data');
     }
 
     /**
@@ -106,23 +64,20 @@ class ChooseMentorController extends Controller
      */
     public function update(Request $request, $student, $id)
     {
+        $academicYear = AcademicYear::where(['is_active' => 1])->first();
+
         // cek apakah dosen ada, takutnya diubah di inspect elemen
         $mentor = User::where(['username' => $request->mentor, 'role_id' => 2, 'active_id' => 1])->first();
          // cek apakah dosen ada, takutnya diubah di inspect elemen
          $student = User::where(['username' => $student, 'role_id' => 3, 'active_id' => 1])->first();
         if(!$mentor || !$student || $student->role_id != 3 || $student->active_id != 1){
-            return "wkwkwk";// salah user
+            return back()->with('status', 'Tidak ada user');// salah user
         }
-
-        $academicYear = AcademicYear::get();
-        $countAcademicYear = count($academicYear);
-        $academicYear = $academicYear[$countAcademicYear-1];
 
         // cek apakah ada student dan mentor di semester yang sama
         $checkMentor = JobTrainingMentor::where(['student_id' => $student->id, 'academic_year_id' => $academicYear->id, 'id' => $id])->first();
-
         if(!$checkMentor){
-            return abort(403);
+            return back()->with('status', 'Gagal menambahkan, data sudah ada!');
         }
 
         // cek apakah benar student sudah mendapatkan mentor
@@ -131,9 +86,8 @@ class ChooseMentorController extends Controller
             'academic_year_id' => $academicYear->id,
             'submission_status_id' => 15,
         ])->first();
-
         if(!$submission){
-            return abort(403);// ga ditemukan submissionnnya
+            return back()->with('status', 'Mahasiswa tidak ditemukan');// ga ditemukan submissionnnya
         }
 
         // jika ada maka ubah data mentornya
@@ -142,6 +96,8 @@ class ChooseMentorController extends Controller
             'academic_year_id' => $academicYear->id, 
             'id' => $id,
             ])->update(['lecturer_id' => $mentor->id]);
+
+            return back()->with('status', 'Data berhasil diubah');
     }
 
     /**
@@ -152,24 +108,18 @@ class ChooseMentorController extends Controller
      */
     public function destroy($student, $id)
     {
-        $academicYear = AcademicYear::get();
-        $countAcademicYear = count($academicYear);
-        $academicYear = $academicYear[$countAcademicYear-1];
+        $academicYear = AcademicYear::where(['is_active' => 1])->first();
         
          // cek apakah dosen ada, takutnya diubah di inspect elemen
          $student = User::where(['username' => $student, 'role_id' => 3, 'active_id' => 1])->first();
-
         if(!$student || $student->role_id != 3 || $student->active_id != 1){
-            return "wkwkwk";// salah user
+            return back()->with('status', 'Dosen tidak ada');// salah user
         }
-
-        
 
         // cek apakah ada student dan mentor di semester yang sama
         $checkMentor = JobTrainingMentor::where(['student_id' => $student->id, 'academic_year_id' => $academicYear->id, 'id' => $id])->first();
-
         if(!$checkMentor){
-            return abort(403);
+            return back()->with('status', 'Data tidak ada');
         }
 
         // cek apakah benar student sudah mendapatkan mentor
@@ -178,9 +128,8 @@ class ChooseMentorController extends Controller
             'academic_year_id' => $academicYear->id,
             'submission_status_id' => 15,
         ])->first();
-
         if(!$submission){
-            return abort(403);// ga ditemukan submissionnnya
+            return back()->with('status', 'Mahasiswa tidak ada');// ga ditemukan submissionnnya
         }
 
         // jika semua aman
@@ -189,6 +138,8 @@ class ChooseMentorController extends Controller
             'user_id' => $student->id,
             'academic_year_id' => $academicYear->id,
             'submission_status_id' => 15,
-        ])->update(['submission_status_id'=>13]);
+        ])->update(['submission_status_id'=>14]);
+
+        return back()->with('status', 'Berhasil menghapus data');
     }
 }

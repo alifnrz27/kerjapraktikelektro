@@ -11,9 +11,8 @@ use Illuminate\Http\Request;
 class MentoringJobTrainingController extends Controller
 {
     public function add(){
-        $academicYear = AcademicYear::get();
-        $countAcademicYear = count($academicYear);
-        $academicYear = $academicYear[$countAcademicYear-1];
+        $academicYear = AcademicYear::where(['is_active'=>1])->first();
+        $lastSubmission = SubmissionJobTraining::where(['user_id'=>auth()->user()->id, 'academic_year_id' => $academicYear->id])->latest()->first();
 
         // cek apakah pengajuan sebelumnya belum selesai
         $addMentorings = MentoringJobTraining::where([
@@ -30,7 +29,7 @@ class MentoringJobTrainingController extends Controller
         }
 
         if($statusMentoring == false){
-            return 'belum boleh ajuin lagi, selesaiin dulu yg sebelumnya';
+            return back()->with('status', 'belum boleh ajuin lagi, selesaiin dulu yg sebelumnya');
         }
 
 
@@ -41,38 +40,44 @@ class MentoringJobTrainingController extends Controller
         MentoringJobTraining::create([
             'student_id'=>auth()->user()->id,
             'academic_year_id' => $academicYear->id,
+            'submission_job_training_id'=>$lastSubmission->id,
             'mentoring_status_id' => 1,
             'lecturer_id' => $mentor->lecturer_id,
             'time' => '-',
             'description'=> '-',
         ]);
+
+        return back()->with('status', 'Berhasil mengajukan bimbingan');
     }
 
     public function accept(Request $request, $studentID){
+        $academicYear = AcademicYear::where(['is_active'=>1])->first();
+        $lastSubmission = SubmissionJobTraining::where(['user_id'=>$studentID, 'academic_year_id' => $academicYear->id])->latest()->first();
+
         $request->validate([
             'time' => 'required',
             'description' => 'required',
         ]);
 
 
-        $academicYear = AcademicYear::get();
-        $countAcademicYear = count($academicYear);
-        $academicYear = $academicYear[$countAcademicYear-1];
+        $academicYear = AcademicYear::where(['is_active' => 1])->first();
         // cek apakah ada yg mengajukan, takutnya diubah ubah datanya di inspect elemen
         $check = MentoringJobTraining::where([
             'student_id' => $studentID,
             'lecturer_id' => auth()->user()->id,
+            'submission_job_training_id'=>$lastSubmission->id,
             'academic_year_id' =>$academicYear->id,
             'mentoring_status_id' => 1,
         ])->first();
 
         if(!$check){
-            return "data gaada";
+            return back()->with('status', 'Data tidak ditemukan');
         }
 
         MentoringJobTraining::where([
             'student_id' => $studentID,
             'lecturer_id' => auth()->user()->id,
+            'submission_job_training_id'=>$lastSubmission->id,
             'academic_year_id' =>$academicYear->id,
             'mentoring_status_id' => 1,
         ])->update([
@@ -80,38 +85,42 @@ class MentoringJobTrainingController extends Controller
             'time' => $request->time,
             'description' => $request->description,
         ]);
+
+        return back()->with('status', 'Data berhasil ditambahkan');
     }
 
     public function decline(Request $request, $studentID){
-        $academicYear = AcademicYear::get();
-        $countAcademicYear = count($academicYear);
-        $academicYear = $academicYear[$countAcademicYear-1];
+        $academicYear = AcademicYear::where(['is_active'=>1])->first();
+        $lastSubmission = SubmissionJobTraining::where(['user_id'=>$studentID, 'academic_year_id' => $academicYear->id])->latest()->first();
+
         // cek apakah ada yg mengajukan, takutnya diubah ubah datanya di inspect elemen
         $check = MentoringJobTraining::where([
             'student_id' => $studentID,
             'lecturer_id' => auth()->user()->id,
+            'submission_job_training_id'=>$lastSubmission->id,
             'academic_year_id' =>$academicYear->id,
             'mentoring_status_id' => 1,
         ])->first();
 
         if(!$check){
-            return "data gaada";
+            return back()->with('status', 'Data tidak ditemukan');
         }
 
         MentoringJobTraining::where([
             'student_id' => $studentID,
             'lecturer_id' => auth()->user()->id,
+            'submission_job_training_id'=>$lastSubmission->id,
             'academic_year_id' =>$academicYear->id,
             'mentoring_status_id' => 1,
         ])->update([
             'mentoring_status_id' => 2,
         ]);
+
+        return back()->with('status', 'Berhasil menolak');
     }
 
     public function cancel(Request $request, $queueID){
-        $academicYear = AcademicYear::get();
-        $countAcademicYear = count($academicYear);
-        $academicYear = $academicYear[$countAcademicYear-1];
+        $academicYear = AcademicYear::where(['is_active' => 1])->first();
         // cek apakah ada yg mengajukan, takutnya diubah ubah datanya di inspect elemen
         $check = MentoringJobTraining::where([
             'id' => $queueID,
@@ -121,7 +130,7 @@ class MentoringJobTrainingController extends Controller
         ])->first();
 
         if(!$check){
-            return "data gaada";
+            return back()->with('status', 'Data tidak ditemukan');
         }
 
         MentoringJobTraining::where([
@@ -132,12 +141,12 @@ class MentoringJobTrainingController extends Controller
         ])->update([
             'mentoring_status_id' => 2,
         ]);
+
+        return back()->with('status', 'Berhasil membatalkan');
     }
 
     public function finished(Request $request, $queueID){
-        $academicYear = AcademicYear::get();
-        $countAcademicYear = count($academicYear);
-        $academicYear = $academicYear[$countAcademicYear-1];
+        $academicYear = AcademicYear::where(['is_active' => 1])->first();
         // cek apakah ada yg mengajukan, takutnya diubah ubah datanya di inspect elemen
         $check = MentoringJobTraining::where([
             'id' => $queueID,
@@ -147,7 +156,7 @@ class MentoringJobTrainingController extends Controller
         ])->first();
 
         if(!$check){
-            return "data gaada";
+            return back()->with('status', 'Data tidak ditemukan');
         }
 
         MentoringJobTraining::where([
@@ -158,6 +167,8 @@ class MentoringJobTrainingController extends Controller
         ])->update([
             'mentoring_status_id' => 4,
         ]);
+
+        return back()->with('status', 'Berhasil merubah data');
     }
 
     public function update(Request $request, $queueID){
@@ -165,9 +176,7 @@ class MentoringJobTrainingController extends Controller
             'time' => 'required',
             'description' => 'required',
         ]);
-        $academicYear = AcademicYear::get();
-        $countAcademicYear = count($academicYear);
-        $academicYear = $academicYear[$countAcademicYear-1];
+        $academicYear = AcademicYear::where(['is_active' =>1])->first();
         // cek apakah ada yg mengajukan, takutnya diubah ubah datanya di inspect elemen
         $check = MentoringJobTraining::where([
             'id' => $queueID,
@@ -177,7 +186,7 @@ class MentoringJobTrainingController extends Controller
         ])->first();
 
         if(!$check){
-            return "data gaada";
+            return back()->with('status', 'Data tidak ditemukan');
         }
 
         MentoringJobTraining::where([
@@ -189,5 +198,7 @@ class MentoringJobTrainingController extends Controller
             'time' => $request->time,
             'description' => $request->description
         ]);
+
+        return back()->with('status', 'Berhasil update data');
     }
 }

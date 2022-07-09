@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Models\AcademicYear;
+use App\Models\JobTrainingTitleStatus;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class AcademicYearSeeder extends Seeder
+class JobTrainingTitleStatusSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -15,21 +15,21 @@ class AcademicYearSeeder extends Seeder
      */
     public function run()
     {
-        $academicYear = [
+        $status = [
             [
                 'id'    => 1,
-                'semester_id' => 2,
-                'year'=>'2023/2022',
-                'is_active' => 0,
+                'name' => 'Sedang diajukan',
             ],
             [
                 'id'    => 2,
-                'semester_id' => 1,
-                'year'=>'2022/2023',
-                'is_active' => 1,
+                'name' => 'Ditolak',
+            ],
+            [
+                'id'    => 3,
+                'name' => 'Diterima',
             ],
         ];
 
-        AcademicYear::insert($academicYear);
+        JobTrainingTitleStatus::insert($status);
     }
 }

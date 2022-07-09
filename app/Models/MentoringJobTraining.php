@@ -12,6 +12,7 @@ class MentoringJobTraining extends Model
         'student_id',
         'lecturer_id',
         'mentoring_status_id',
+        'submission_job_training_id',
         'time',
         'description',
         'academic_year_id',

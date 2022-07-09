@@ -13,11 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('academic_years', function (Blueprint $table) {
+        Schema::create('job_training_title_statuses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('semester_id');
-            $table->string('year');
-            $table->boolean('is_active');
+            $table->string('name')->unique();
             $table->timestamps();
         });
     }
@@ -29,6 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('academic_years');
+        Schema::dropIfExists('job_training_title_statuses');
     }
 };

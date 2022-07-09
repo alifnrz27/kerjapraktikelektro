@@ -13,15 +13,15 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('mentoring_job_trainings', function (Blueprint $table) {
+        Schema::create('job_training_titles', function (Blueprint $table) {
             $table->id();
             $table->foreignId('student_id');
             $table->foreignId('lecturer_id');
             $table->foreignId('submission_job_training_id');
-            $table->string('time')->nullable();
-            $table->string('description')->nullable();
             $table->foreignId('academic_year_id');
-            $table->foreignId('mentoring_status_id');
+            $table->string('title');
+            $table->string('description')->nullable();
+            $table->foreignId('job_training_title_status_id');
             $table->timestamps();
         });
     }
@@ -33,6 +33,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('mentoring_job_trainings');
+        Schema::dropIfExists('job_training_titles');
     }
 };

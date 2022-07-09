@@ -12,17 +12,8 @@ use Illuminate\Http\Request;
 class SubmissionLetterController extends Controller
 {
     public function upload(Request $request){
-        // cek apakah yang akses adalah mahasiswa
-        if(auth()->user()->role_id != 3){
-            return abort(403);
-        }
-        $submission = SubmissionJobTraining::where('user_id', auth()->user()->id)->get();
-        $countSubmission = count($submission);
-        $submission = $submission[$countSubmission-1];
-
-        $academicYear = AcademicYear::get();
-        $countAcademicYear = count($academicYear);
-        $academicYear = $academicYear[$countAcademicYear-1];
+        $submission = SubmissionJobTraining::where('user_id', auth()->user()->id)->latest()->first();
+        $academicYear = AcademicYear::where(['is_active' => 1])->first();
 
         $rules = [
             'replyFromMajor' => 'required',
@@ -30,7 +21,6 @@ class SubmissionLetterController extends Controller
         ];
 
         $validated = $request->validate($rules);
-
         // jika tidak ada kelompok
         if($submission->team_id == 0){
             $validatedData = [
@@ -43,7 +33,7 @@ class SubmissionLetterController extends Controller
             ];
             ReplyLetter::create($validatedData);
             SubmissionJobTraining::where('id', $submission->id)
-            ->update(['submission_status_id' => 11]);
+            ->update(['submission_status_id' => 12]);
         }
 
         // jika ada kelompok
@@ -59,18 +49,14 @@ class SubmissionLetterController extends Controller
             ReplyLetter::create($validatedData);
             
             SubmissionJobTraining::where(['team_id'=> $submission->team_id, 'submission_status_id'=>10])
-            ->update(['submission_status_id' => 11]);
+            ->update(['submission_status_id' => 12]);
         }
+
+        return back()->with('status', 'Berhasil upload berkas jurusan');
     }
 
     public function acceptLetter(Request $request, User $user, $team_id){
-        // cek apakah yang akses adalah admin
-        if(auth()->user()->role_id != 1){
-            return abort(403);
-        }
-        $academicYear = AcademicYear::get();
-        $countAcademicYear = count($academicYear);
-        $academicYear = $academicYear[$countAcademicYear-1];
+        $academicYear = AcademicYear::where(['is_active' => 1])->first();
         // cek keberadaan data, takutnya diubah dari inspect element
         $checkLetter = ReplyLetter::where([
             'team_id' => $team_id,
@@ -80,7 +66,7 @@ class SubmissionLetterController extends Controller
         ])->first();
 
         if(!$checkLetter){
-            return "salah";
+            return back()->with('status', 'Data tidak ditemukan');
         }
 
         ReplyLetter::where([
@@ -93,9 +79,9 @@ class SubmissionLetterController extends Controller
         if($checkLetter->team_id == 0){
             SubmissionJobTraining::where([
                 'user_id' => $checkLetter->user_id,
-                'submission_status_id' => 11,
+                'submission_status_id' => 12,
             ])->update([
-                'submission_status_id' => 13,
+                'submission_status_id' => 14,
             ]);
         }
 
@@ -103,21 +89,18 @@ class SubmissionLetterController extends Controller
         else{
             SubmissionJobTraining::where([
                 'team_id' => $checkLetter->team_id,
-                'submission_status_id' => 11,
+                'submission_status_id' => 12,
             ])->update([
-                'submission_status_id' => 13,
+                'submission_status_id' => 14,
             ]);
         }
+
+        return back()->with('status', 'Berhasil menerima data');
     }
 
     public function declineLetter(Request $request, User $user, $team_id){
-        // cek apakah yang akses adalah admin
-        if(auth()->user()->role_id != 1){
-            return abort(403);
-        }
-        $academicYear = AcademicYear::get();
-        $countAcademicYear = count($academicYear);
-        $academicYear = $academicYear[$countAcademicYear-1];
+        $academicYear = AcademicYear::where(['is_active'=>1])->first();
+
         // cek keberadaan data, takutnya diubah dari inspect element
         $checkLetter = ReplyLetter::where([
             'team_id' => $team_id,
@@ -127,7 +110,7 @@ class SubmissionLetterController extends Controller
         ])->first();
 
         if(!$checkLetter){
-            return "salah";
+            return back()->with('status', 'Data tidak ditemukan');
         }
 
         ReplyLetter::where([
@@ -140,11 +123,12 @@ class SubmissionLetterController extends Controller
         if($checkLetter->team_id == 0){
             SubmissionJobTraining::where([
                 'user_id' => $checkLetter->user_id,
-                'submission_status_id' => 11,
-            ])->update([
                 'submission_status_id' => 12,
+            ])->update([
+                'submission_status_id' => 13,
                 'description' => $request->description,
             ]);
+
         }
 
         // jika berkelompok
@@ -157,5 +141,6 @@ class SubmissionLetterController extends Controller
                 'description' => $request->description,
             ]);
         }
+        return back()->with('status', 'Berhasil menolak surat');
     }
 }

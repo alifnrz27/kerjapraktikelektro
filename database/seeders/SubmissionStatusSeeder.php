@@ -18,91 +18,115 @@ class SubmissionStatusSeeder extends Seeder
         $submissionStatus = [
             [
                 'id'    => 1,
-                'name' => 'Sudah diajukan pendaftaran',
+                'name' => 'Menuggu seluruh anggota tim menerima undangan',
             ],
             [
                 'id'    => 2,
-                'name' => 'Menuggu terima undangan anggota',
+                'name' => 'Anda mendapat undangan tim',
             ],
             [
                 'id'    => 3,
-                'name' => 'Mendapat undangan tim',
+                'name' => 'Anda menolak undangan',
             ],
             [
                 'id'    => 4,
-                'name' => 'Menerima undangan tim',
+                'name' => 'Anda menerima undangan, lengkapi berkas',
             ],
             [
                 'id'    => 5,
-                'name' => 'Menolak Undangan',
+                'name' => 'Menunggu seluruh anggota tim upload berkas',
             ],
             [
                 'id'    => 6,
-                'name' => 'Menuggu tim upload berkas',
+                'name' => 'Anda membatalkan pengajuan',
             ],
             [
                 'id'    => 7,
-                'name' => 'Mahasiswa membatalkan pengajuan',
-            ],
-            [
-                'id'    => 8,
                 'name' => 'Anggota tim membatalkan pengajuan',
             ],
             [
+                'id'    => 8,
+                'name' => 'Tendik menolak/membatalkan pengajuan',
+            ],
+            [
                 'id'    => 9,
-                'name' => 'Tendik membatalkan pengajuan',
+                'name' => 'Tendik sedang memeriksa',
             ],
             [
                 'id'    => 10,
-                'name' => 'Berkas awal diterima',
+                'name' => 'Berkas awal diterima, upload berkas jurusan dan balasan instansi',
             ],
             [
                 'id'    => 11,
-                'name' => 'Pengajuan baru dari jurusan',
+                'name' => 'Mengnuggu seluruh berkas anggota tim diterima',
             ],
             [
                 'id'    => 12,
-                'name' => 'Berkas jurusan di tolak',
+                'name' => 'Tendik memeriksa berkas jurusan',
             ],
             [
                 'id'    => 13,
-                'name' => 'KP diterima',
+                'name' => 'Surat jurusan ditolak Tendik',
             ],
             [
                 'id'    => 14,
-                'name' => 'Menunggu seluruh anggota tim diterima admin',
+                'name' => 'KP diterima',
             ],
             [
                 'id'    => 15,
-                'name' => 'Sudah dapat dosen pembimbing',
+                'name' => 'Sudah dapat dosen wali',
             ],
             [
                 'id'    => 16,
-                'name' => 'Selesai bimbingan dan Tidak ada revisi laporan',
+                'name' => 'Judul sedang diajukan',
             ],
             [
                 'id'    => 17,
-                'name' => 'Berkas pra-presentasi diajukan, menunggu admin',
+                'name' => 'Judul ditolak',
             ],
             [
                 'id'    => 18,
-                'name' => 'Berkas pra-presentasi ditolak, ajukan ulang',
+                'name' => 'Judul diterima',
             ],
             [
                 'id'    => 19,
-                'name' => 'Berkas pra-presentasi diterima',
+                'name' => 'Tendik memeriksa berkas sebelum presentasi',
             ],
             [
                 'id'    => 20,
-                'name' => 'Mengajukan presentasi',
+                'name' => 'Berkas ditolak, upload ulang!',
             ],
             [
                 'id'    => 21,
-                'name' => 'Presentasi sudah dijadwalkan',
+                'name' => 'Berkas diterima',
             ],
             [
                 'id'    => 22,
-                'name' => 'Sudah presentasi',
+                'name' => 'Sedang mengajukan presentasi',
+            ],
+            [
+                'id'    => 23,
+                'name' => 'Presentasi diterima, semoga sukses!!!',
+            ],
+            [
+                'id'    => 24,
+                'name' => 'Presentasi telah dilaksanakan',
+            ],
+            [
+                'id'    => 25,
+                'name' => 'Menunggu tendik memeriksa berkas pasca presentasi',
+            ],
+            [
+                'id'    => 26,
+                'name' => 'Berkas pasca presentasi ditolak, upload ulang!',
+            ],
+            [
+                'id'    => 27,
+                'name' => 'Berkas pasca presentasi diterima',
+            ],
+            [
+                'id'    => 28,
+                'name' => 'Hardcopy telah dikumpulkan',
             ],
         ];
 
