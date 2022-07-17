@@ -3,16 +3,19 @@
 use App\Http\Controllers\BeforePresentationController;
 use App\Http\Controllers\CheckEmailController;
 use App\Http\Controllers\ChooseMentorController;
+use App\Http\Controllers\EvaluateController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\JobTrainingController;
 use App\Http\Controllers\JobTrainingTitleController;
 use App\Http\Controllers\LogbookController;
 use App\Http\Controllers\MentoringJobTrainingController;
+use App\Http\Controllers\SubmissionAfterPresentationController;
 use App\Http\Controllers\SubmissionJobTrainingController;
 use App\Http\Controllers\SubmissionLetterController;
 use App\Http\Controllers\SubmissionReportController;
 use App\Models\JobTrainingTitle;
 use App\Models\MentoringJobTraining;
+use App\Models\SubmissionAfterPresentation;
 use App\Models\SubmissionReport;
 use Illuminate\Support\Facades\Route;
 
@@ -79,4 +82,13 @@ Route::middleware([
     Route::post('/add-before-presentation', [BeforePresentationController::class, 'add']);
     Route::post('/decline-before-presentation/{student}/{id}', [BeforePresentationController::class, 'decline']);
     Route::post('/accept-before-presentation/{student}/{id}', [BeforePresentationController::class, 'accept']);
+
+    Route::post('/accept-presentation/{student}/{id}', [PresentationController::class, 'accept']);
+
+    Route::post('/eval-presentation/{student}/{id}', [EvaluateController::class, 'add']);
+    Route::post('/update-eval-presentation/{student}/{id}', [EvaluateController::class, 'update']);
+
+    Route::post('/add-form-after-presentation', [SubmissionAfterPresentationController::class, 'add']);
+    Route::post('/decline-after-presentation/{student}/{id}', [SubmissionAfterPresentationController::class, 'decline']);
+    Route::post('/accept-after-presentation/{student}/{id}', [SubmissionAfterPresentationController::class, 'accept']);
 });

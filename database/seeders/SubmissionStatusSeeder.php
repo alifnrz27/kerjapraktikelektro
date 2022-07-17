@@ -114,18 +114,22 @@ class SubmissionStatusSeeder extends Seeder
             ],
             [
                 'id'    => 25,
-                'name' => 'Menunggu tendik memeriksa berkas pasca presentasi',
+                'name' => 'Sudah dinilai',
             ],
             [
                 'id'    => 26,
-                'name' => 'Berkas pasca presentasi ditolak, upload ulang!',
+                'name' => 'Menunggu tendik memeriksa berkas pasca presentasi',
             ],
             [
                 'id'    => 27,
-                'name' => 'Berkas pasca presentasi diterima',
+                'name' => 'Berkas pasca presentasi ditolak, upload ulang!',
             ],
             [
                 'id'    => 28,
+                'name' => 'Berkas pasca presentasi diterima',
+            ],
+            [
+                'id'    => 29,
                 'name' => 'Hardcopy telah dikumpulkan',
             ],
         ];

@@ -13,16 +13,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('before_presentations', function (Blueprint $table) {
+        Schema::create('presentations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('student_id');
+            $table->foreignId('lecturer_id');
             $table->string('date');
-            $table->string('company');
-            $table->string('form');
-            $table->string('logbook');
             $table->string('description')->nullable();
             $table->foreignId('academic_year_id');
-            $table->foreignId('before_presentation_status_id');
+            $table->foreignId('presentation_status_id');
             $table->timestamps();
         });
     }
@@ -34,6 +32,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('before_presentations');
+        Schema::dropIfExists('presentations');
     }
 };

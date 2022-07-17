@@ -4,14 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\AcademicYear;
 use App\Models\beforePresentation;
+use App\Models\beforePresentationStatus;
+use App\Models\Evaluate;
 use App\Models\JobTrainingMentor;
 use App\Models\JobTrainingTitle;
 use App\Models\JobTrainingTitleStatus;
 use App\Models\Logbook;
 use App\Models\MentoringJobTraining;
 use App\Models\MentoringStatus;
+use App\Models\Presentation;
 use App\Models\ReplyLetter;
 use App\Models\ReplyLetterStatus;
+use App\Models\SubmissionAfterPresentation;
 use App\Models\SubmissionJobTraining;
 use App\Models\SubmissionReport;
 use App\Models\SubmissionReportStatus;
@@ -35,6 +39,9 @@ class JobTrainingController extends Controller
             'historyQueueSubmissions' => Null,
             'queueSubmissionStatus'=> Null,
             'beforePresentationQueue' => Null,
+            'beforePresentationQueueHistory' => Null,
+            'beforePresentationQueueHistoryStatus' => Null,
+            'afterPresentationQueue'=>Null,
             'newLetters' => Null,
             'historyLetters' => Null,
             'historyLettersStatus' => Null,
@@ -45,6 +52,9 @@ class JobTrainingController extends Controller
             'addMentoring' => Null,
             'allStudents' => Null,
             'mentoringQueue' => Null,
+            'presentationQueue' => Null,
+            'evalQueue'=>Null,
+            'evalQueueHistory' => Null,
             'lecturerMentoringHistory' => Null,
             'lecturerMentoringHistoryStatus' => Null,
             'jobTrainingTitles'=>Null,
@@ -129,6 +139,19 @@ class JobTrainingController extends Controller
             if(count($beforePresentationQueue) > 0){
                 $data['beforePresentationQueue'] = $beforePresentationQueue;
             }
+            $beforePresentationQueueHistory = beforePresentation::where(['academic_year_id' => $academicYear->id])->get();
+            if(count($beforePresentationQueueHistory) > 0){
+                $data['beforePresentationQueueHistory'] = $beforePresentationQueueHistory;
+            }
+
+            $beforePresentationQueueHistoryStatus = beforePresentationStatus::get();
+            $data['beforePresentationQueueHistoryStatus'] = $beforePresentationQueueHistoryStatus;
+
+            // Mengambil data mahasiswa yangg mengumpulkan berkas setelah seminar
+            $afterPresentationQueue = SubmissionAfterPresentation::where(['academic_year_id' => $academicYear->id, 'submission_after_presentation_status_id' =>1])->get();
+            if(count($afterPresentationQueue) > 0){
+                $data['afterPresentationQueue'] = $afterPresentationQueue;
+            }
 
         }
 
@@ -178,7 +201,24 @@ class JobTrainingController extends Controller
             if(count($reportQueue) > 0){
                 $data['reportQueue'] = $reportQueue;
             }
+
+            // ambil daftar antri presentasi
+            $presentationQueue = Presentation::where(['academic_year_id'=>$academicYear->id, 'lecturer_id'=>auth()->user()->id, 'presentation_status_id'=>1])->get();
+            $data['presentationQueue'] = $presentationQueue;
+
+            // ambil daftar antri nilai
+            $evalQueue = Evaluate::where(['academic_year_id'=>$academicYear->id, 'lecturer_id'=>auth()->user()->id, 'evaluate_status_id' =>1])->get();
+            if(count($evalQueue) > 0){
+                $data['evalQueue'] = $evalQueue;
+            }
+
+            // ambil daftar history nilai
+            $evalQueueHistory = Evaluate::where(['academic_year_id'=>$academicYear->id, 'lecturer_id'=>auth()->user()->id, 'evaluate_status_id' =>2])->get();
+            if(count($evalQueueHistory) > 0){
+                $data['evalQueueHistory'] = $evalQueueHistory;
+            }
         }
+
 
 
         // jika user adalah mahasiswa

@@ -5,17 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class beforePresentation extends Model
+class Presentation extends Model
 {
     use HasFactory;
     protected $fillable = [
         'student_id',
+        'lecturer_id',
         'date',
-        'company',
-        'form',
-        'logbook',
         'description',
         'academic_year_id',
-        'before_presentation_status_id',
+        'presentation_status_id',
     ];
 }
